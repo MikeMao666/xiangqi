@@ -1,0 +1,60 @@
+package edu.sustech.xiangqi.model;
+
+/**
+ * 帅/将
+ */
+public class GeneralPiece extends AbstractPiece {
+
+    public GeneralPiece(String name, int row, int col, boolean isRed) {
+        super(name, row, col, isRed);
+    }
+
+    @Override
+    public boolean canMoveTo(int targetRow, int targetCol, ChessBoardModel model) {
+        int currentRow = getRow();
+        int currentCol = getCol();
+
+        // 不能原地不动
+        if (currentRow == targetRow && currentCol == targetCol) {
+            return false;
+        }
+
+        // 不能吃自己的棋子
+        AbstractPiece targetPiece = model.getPieceAt(targetRow, targetCol);
+        if (targetPiece != null && targetPiece.isRed() == this.isRed()) {
+            return false;
+        }
+
+        int rowDiff = Math.abs(targetRow - currentRow);
+        int colDiff = Math.abs(targetCol - currentCol);
+
+        // 1. 检查是否在九宫格内移动
+        if (!isInPalace(targetRow, targetCol)) {
+            return false;
+        }
+
+        // 2. 检查移动距离：只能横向或竖向移动一格
+        if (!((rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 检查目标位置是否在九宫格内
+     */
+    private boolean isInPalace(int row, int col) {
+        if (isRed()) {
+            // 红方九宫格：行0-2，列3-5
+            return row >= 7 && row <= 9 && col >= 3 && col <= 5;
+        } else {
+            // 黑方九宫格：行7-9，列3-5
+            return row >= 0 && row <= 2 && col >= 3 && col <= 5;
+        }
+    }
+    /**
+     * 检查移动后是否会导致将帅直接对面
+     */
+
+}
