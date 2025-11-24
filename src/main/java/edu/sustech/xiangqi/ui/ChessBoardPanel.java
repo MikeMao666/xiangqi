@@ -1,7 +1,7 @@
 package edu.sustech.xiangqi.ui;
 
-import edu.sustech.xiangqi.model.AbstractPiece;
 import edu.sustech.xiangqi.model.ChessBoardModel;
+import edu.sustech.xiangqi.model.AbstractPiece;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,9 +57,22 @@ public class ChessBoardPanel extends JPanel {
 
         if (selectedPiece == null) {
             selectedPiece = model.getPieceAt(row, col);
-            label.setText("点中棋子");
+            if (selectedPiece != null) {
+                // 检查是否选择了正确颜色的棋子
+                if (selectedPiece.isRed() != model.isRedTurn()) {
+                    label.setText("当前是" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+                    selectedPiece = null;
+                    return;
+                }
+                label.setText("选中" + (selectedPiece.isRed() ? "红" : "黑") + selectedPiece.getName());
+            }
         } else {
-            model.movePiece(selectedPiece, row, col);
+            boolean moveSuccess = model.movePiece(selectedPiece, row, col);
+            if (moveSuccess) {
+                label.setText("移动成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+            } else {
+                label.setText("移动失败，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+            }
             selectedPiece = null;
         }
 

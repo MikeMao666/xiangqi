@@ -1,5 +1,7 @@
 package edu.sustech.xiangqi;
 
+import edu.sustech.xiangqi.model.ChessBoardModel;
+import edu.sustech.xiangqi.ui.ChessBoardPanel;
 import edu.sustech.xiangqi.ui.GameFrame;
 
 import javax.swing.*;
@@ -25,7 +27,7 @@ public class XiangqiApplication {
                 loginFrame.setVisible(false);
 
             });
-            loginFrame.setLocationRelativeTo(null);
+
             loginFrame.add(login);
             loginFrame.add(textField);
             loginFrame.setVisible(true);

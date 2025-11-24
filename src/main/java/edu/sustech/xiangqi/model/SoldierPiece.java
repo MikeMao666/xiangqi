@@ -13,6 +13,7 @@ public class SoldierPiece extends AbstractPiece {
     public boolean canMoveTo(int targetRow, int targetCol, ChessBoardModel model) {
         int currentRow = getRow();
         int currentCol = getCol();
+        GeneralPiece generalPiece = new GeneralPiece(getName(), currentRow, currentCol, isRed());
 
         if (currentRow == targetRow && currentCol == targetCol) {
             return false;
@@ -20,6 +21,11 @@ public class SoldierPiece extends AbstractPiece {
 
         int rowDiff = targetRow - currentRow;
         int colDiff = Math.abs(targetCol - currentCol);
+        // 不能吃自己的棋子
+        AbstractPiece targetPiece = model.getPieceAt(targetRow, targetCol);
+        if (targetPiece != null && targetPiece.isRed() == this.isRed()) {
+            return false;
+        }
 
         // 兵/卒的移动规则：
         // 1. 未过河前只能向前走一步
