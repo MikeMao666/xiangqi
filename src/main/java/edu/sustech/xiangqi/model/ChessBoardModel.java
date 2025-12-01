@@ -1,9 +1,11 @@
 package edu.sustech.xiangqi.model;
 
+import edu.sustech.xiangqi.model.pieces.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
+import java.util.stream.Collectors;
 
 
 public class ChessBoardModel {
@@ -14,25 +16,6 @@ public class ChessBoardModel {
     private boolean isRedTurn = true;
 
     private Stack<MoveRecord> moveHistory = new Stack<>( );
-
-    private static class MoveRecord {
-        AbstractPiece piece;
-        int fromRow;
-        int fromCol;
-        int toRow;
-        int toCol;
-        AbstractPiece capturedPiece; // 被吃掉的棋子，如果没有则为null
-
-        MoveRecord(AbstractPiece piece, int fromRow, int fromCol, int toRow, int toCol, AbstractPiece capturedPiece) {
-            this.piece = piece;
-            this.fromRow = fromRow;
-            this.fromCol = fromCol;
-            this.toRow = toRow;
-            this.toCol = toCol;
-            this.capturedPiece = capturedPiece;
-        }
-    }
-
     public ChessBoardModel() {
         pieces = new ArrayList<>();
         initializePieces();
@@ -53,8 +36,8 @@ public class ChessBoardModel {
         pieces.add(new HorsePiece("馬", 0, 7, false));
         pieces.add(new ChariotPiece("車", 0, 0, false));
         pieces.add(new ChariotPiece("車", 0, 8, false));
-        pieces.add(new CannonPiece("炮", 2, 1, false));
-        pieces.add(new CannonPiece("炮", 2, 7, false));
+        pieces.add(new CannonPiece("砲", 2, 1, false));
+        pieces.add(new CannonPiece("砲", 2, 7, false));
         pieces.add(new SoldierPiece("卒", 3, 0, false));
         pieces.add(new SoldierPiece("卒", 3, 2, false));
         pieces.add(new SoldierPiece("卒", 3, 4, false));
@@ -139,7 +122,7 @@ public class ChessBoardModel {
         }
         isRedTurn = !isRedTurn;
 
-        moveHistory.push(new MoveRecord(piece, originalRow, originalCol, newRow, newCol, targetPiece));
+        moveHistory.push(new MoveRecord(piece, originalRow, originalCol, newRow, newCol, targetPiece, this));
 
         return true;
     }
@@ -179,6 +162,9 @@ public class ChessBoardModel {
         isRedTurn = redTurn;
     }
 
+    /*
+    * 读写移动记录
+    * */
     public Stack<MoveRecord> getMoveHistory() {
         return moveHistory;
     }
@@ -242,4 +228,70 @@ public class ChessBoardModel {
         return COLS;
     }
 
+    /**
+     * 从棋谱存档加载游戏
+     */
+    public boolean loadFromNotationSave(Save save) {
+        if (save == null) return false;
+
+        try {
+            // 重置棋盘到初始状态
+            resetGame();
+
+            // 重新执行所有走法
+            List<String> notations = save.getMoveNotations();
+            for (String notation : notations) {
+                NotationAnalyzer analyzer = new NotationAnalyzer(notation, this);
+
+                int fromRow = analyzer.getFromRow();
+                int fromCol = analyzer.getFromCol();
+                int toRow = analyzer.getToRow();
+                int toCol = analyzer.getToCol();
+
+                AbstractPiece piece = getPieceAt(fromRow, fromCol);
+
+                boolean isValidMove = this.movePiece(piece, toRow, toCol);
+                if (!isValidMove)
+                    return false;
+            }
+
+            // 设置正确的回合状态
+            this.isRedTurn = save.isRedTurn();
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("从棋谱加载游戏时发生错误: " + e.getMessage());
+            // 出错时重置游戏
+            resetGame();
+            return false;
+        }
+    }
+
+    /**
+     * 获取当前棋谱记录（用于显示）
+     */
+    public List<String> getMoveNotations() {
+        return moveHistory.stream()
+                .map(MoveRecord::getNotation)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取格式化的棋谱（带序号）
+     */
+    public List<String> getFormattedNotations() {
+        List<String> notations = getMoveNotations();
+        List<String> formattedNotation = new ArrayList<>();
+
+        for (int i = 0; i < notations.size(); i += 2) {
+            int moveNumber = (i / 2) + 1;
+            String redMove = notations.get(i);
+            String blackMove = (i + 1 < notations.size()) ? notations.get(i + 1) : "";
+
+            formattedNotation.add(String.format("%-6d%-10s%-10s", moveNumber, redMove, blackMove));
+        }
+
+        return formattedNotation;
+    }
 }

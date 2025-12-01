@@ -1,7 +1,7 @@
 package edu.sustech.xiangqi.ui;
 
 import edu.sustech.xiangqi.model.ChessBoardModel;
-import edu.sustech.xiangqi.model.AbstractPiece;
+import edu.sustech.xiangqi.model.pieces.AbstractPiece;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,12 @@ import java.awt.event.MouseEvent;
 public class ChessBoardPanel extends JPanel {
     private final ChessBoardModel model;
     private  JLabel label;
+    // 在ChessBoardPanel.java中添加
+    private NotationPanel notationPanel;
 
+    public void setNotationPanel(NotationPanel notationPanel) {
+        this.notationPanel = notationPanel;
+    }
     public void setLabel(JLabel label){this.label = label;}
 
     /**
@@ -70,15 +75,19 @@ public class ChessBoardPanel extends JPanel {
             boolean moveSuccess = model.movePiece(selectedPiece, row, col);
             if (moveSuccess) {
                 label.setText("移动成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+                // 更新棋谱显示
+                if (notationPanel != null) {
+                    notationPanel.updateNotation();
+                }
             } else {
                 label.setText("移动失败，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
             }
             selectedPiece = null;
         }
-
         // 处理完点击事件后，需要重新绘制ui界面才能让界面上的棋子“移动”起来
         // Swing 会将多个请求合并后再重新绘制，因此调用 repaint 后gui不会立刻变更
         // repaint 中会调用 paintComponent，从而重新绘制gui上棋子的位置等
+
         this.getParent().repaint();
     }
 
