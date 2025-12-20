@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况">
+    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况&#10;-autosave on exit&#10;-困毙验证">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/saves/test01_01.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/saves/test01_将死测试.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/ChessBoardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/ChessBoardModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/NotationGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/NotationGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/MoveRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/MoveRecord.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -65,7 +60,6 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "ma",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
@@ -129,7 +123,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765877069371</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况&#10;-autosave on exit&#10;-困毙验证">
+      <option name="closed" value="true" />
+      <created>1766206502072</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1766206502072</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -160,7 +162,8 @@
     <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置" />
     <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15" />
     <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况" />
+    <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况&#10;-autosave on exit&#10;-困毙验证" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况&#10;-autosave on exit&#10;-困毙验证" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -173,15 +176,6 @@
             <option name="WATCH_EXIT" value="false" />
           </properties>
           <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java</url>
-          <line>124</line>
-          <properties class="edu.sustech.xiangqi.ui.GameFrame" method="handleSave">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

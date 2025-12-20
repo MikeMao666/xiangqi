@@ -17,12 +17,19 @@ public class GameFrame extends JFrame {
     private JLabel label;
     private User currentUser;
     private SaveManager saveManager;
+
+    private JButton undoButton;
+    private JButton restartButton;
+    private JButton saveButton;
+    private JButton loadButton;
     private JButton surrenderButton;
     private JButton drawButton;
+
     private Timer victoryTimer;
     private boolean victoryDialogShowing = false;
-    // 新增：记录当前加载的存档名称
+    // 记录当前加载的存档名称
     private String currentLoadedSaveName = null;
+
     public GameFrame(String title, User user) {
         this.currentUser = user;
         this.saveManager = new SaveManager();
@@ -55,10 +62,10 @@ public class GameFrame extends JFrame {
         // 按钮面板
         JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 5, 5));
 
-        JButton undoButton = new JButton("悔棋");
-        JButton restartButton = new JButton("重新开始");
-        JButton saveButton = new JButton("存档");
-        JButton loadButton = new JButton("读档");
+        undoButton = new JButton("悔棋");
+        restartButton = new JButton("重新开始");
+        saveButton = new JButton("存档");
+        loadButton = new JButton("读档");
         surrenderButton = new JButton("投降");
         drawButton = new JButton("和棋");
 
@@ -187,18 +194,18 @@ public class GameFrame extends JFrame {
         }
 
         Object[] selectionValues = new Object[userSaves.size()];
-         for (int i = 0; i < userSaves.size(); i++) {
-        Save s = userSaves.get(i);
-        String displayHtml = String.format(
-            "<html><body style='width: 200px'>" +
-            "<b>%s</b><br>" +
-            "<span style='color: gray; font-size: 8px'>%s</span>" +
-            "</body></html>",
-            s.getSaveName(),
-            s.getSaveTime()
-        );
-        selectionValues[i] = displayHtml;
-    }
+        for (int i = 0; i < userSaves.size(); i++) {
+            Save s = userSaves.get(i);
+            String displayHtml = String.format(
+                    "<html><body style='width: 200px'>" +
+                            "<b>%s</b><br>" +
+                            "<span style='color: gray; font-size: 8px'>%s</span>" +
+                            "</body></html>",
+                    s.getSaveName(),
+                    s.getSaveTime()
+            );
+            selectionValues[i] = displayHtml;
+        }
 
         // 弹出选择框
         String selectedHtml = (String) JOptionPane.showInputDialog(
@@ -312,18 +319,20 @@ public class GameFrame extends JFrame {
             // 设置标志位，防止重复弹出
             victoryDialogShowing = true;
 
+            //锁住按钮
+            disableControlButtons();
+
             // 立即显示胜利消息
             showVictoryMessage();
 
-            // 禁用移动
-            boardPanel.setEnabled(false);
-            surrenderButton.setEnabled(false);
-            drawButton.setEnabled(false);
 
             // 强制刷新界面
             revalidate();
             repaint();
-        } 
+
+            // 稍作延迟，让用户看清最后一步棋
+            SwingUtilities.invokeLater(this::showVictoryMessage);
+        }
     }
 
     /**
@@ -339,7 +348,7 @@ public class GameFrame extends JFrame {
         // 创建胜利对话框
         JDialog victoryDialog = new JDialog(this, "游戏结束", true);
         victoryDialog.setLayout(new BorderLayout());
-        victoryDialog.setSize(400, 300);
+        victoryDialog.setSize(400, 350);
         victoryDialog.setLocationRelativeTo(this);
 
         // 设置背景颜色
@@ -389,16 +398,44 @@ public class GameFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.setOpaque(false);
 
+        JButton replayButton = new JButton("对局回放");
         JButton restartButton = new JButton("重新开始");
         JButton exitButton = new JButton("退出游戏");
 
+        replayButton.setFont(new Font("宋体", Font.BOLD, 14));
         restartButton.setFont(new Font("宋体", Font.BOLD, 14));
         exitButton.setFont(new Font("宋体", Font.BOLD, 14));
 
+
+        replayButton.setBackground(new Color(100, 149, 237));
+        replayButton.setForeground(Color.WHITE);
         restartButton.setBackground(new Color(60, 179, 113));
         restartButton.setForeground(Color.WHITE);
         exitButton.setBackground(new Color(220, 20, 60));
         exitButton.setForeground(Color.WHITE);
+
+        //游客不让回放
+        if (currentUser.isGuest) {
+            replayButton.setEnabled(false);
+            replayButton.setToolTipText("注册用户专享功能");
+        }
+
+
+        replayButton.addActionListener(e -> {
+            // 先关闭胜利弹窗
+            victoryDialog.dispose();
+
+            // 获取移动历史
+            List<MoveRecord> history = model.getMoveHistoryList();
+            if (history.isEmpty()) {
+                JOptionPane.showMessageDialog(victoryDialog, "没有可回放的步数");
+                return;
+            }
+
+            // 打开回放窗口
+            ReplayDialog replayDialog = new ReplayDialog(this, history);
+            replayDialog.setVisible(true);
+        });
 
         restartButton.addActionListener(e -> {
             victoryDialog.dispose();
@@ -407,9 +444,10 @@ public class GameFrame extends JFrame {
         });
 
         exitButton.addActionListener(e -> {
-            System.exit(0);
+            if (checkAndSaveOnExit())//退出前也问要不要保存
+                System.exit(0);
         });
-
+        buttonPanel.add(replayButton);
         buttonPanel.add(restartButton);
         buttonPanel.add(exitButton);
 
@@ -424,6 +462,7 @@ public class GameFrame extends JFrame {
             public void windowClosed(java.awt.event.WindowEvent windowEvent) {
                 victoryDialogShowing = false;
             }
+
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 victoryDialogShowing = false;
@@ -440,6 +479,9 @@ public class GameFrame extends JFrame {
         model.resetGame();
         this.currentLoadedSaveName = null;
         label.setText("红方回合");
+
+        enableControlButtons();
+
         boardPanel.repaint();
         notationPanel.updateNotation();
 
@@ -469,20 +511,21 @@ public class GameFrame extends JFrame {
 //        // 强制检查一次状态
 //        checkGameState();
     }
-    public void checkAndSaveOnExit() {
-        // 游客不保存
-        if (currentUser.isGuest) {
-            return;
-        }
 
-        // 游戏已经结束也不用保存
-        if (model.getGameState() != ChessBoardModel.GameState.PLAYING) {
-            return;
+    /**
+     * 退出前检查保存
+     *
+     * @return true=可以退出, false=用户取消了操作，不要退出
+     */
+    public boolean checkAndSaveOnExit() {
+        // 游客直接退出，不保存
+        if (currentUser.isGuest) {
+            return true;
         }
 
         int option = JOptionPane.showConfirmDialog(
                 this,
-                "正在退出游戏，是否保存当前进度？",
+                "正在退出游戏，是否保存当前棋谱？", //稍微改了下文案，更准确
                 "退出保存",
                 JOptionPane.YES_NO_CANCEL_OPTION
         );
@@ -490,7 +533,7 @@ public class GameFrame extends JFrame {
         if (option == JOptionPane.YES_OPTION) {
             String saveName;
 
-            //如果当前是读档进来的，询问是否覆盖
+            // 如果是读档的，询问覆盖还是另存为
             if (currentLoadedSaveName != null) {
                 Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档"};
                 int saveChoice = JOptionPane.showOptionDialog(
@@ -505,27 +548,54 @@ public class GameFrame extends JFrame {
                 );
 
                 if (saveChoice == 0) {
-                    // 选择覆盖
                     saveName = currentLoadedSaveName;
-                } else {
-                    // 选择另存为
-                    String timeStr = LocalDateTime.now()
+                } else if (saveChoice == 1) {
+                    // 另存为
+                    String timeStr = java.time.LocalDateTime.now()
                             .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                     saveName = "AutoSave_" + timeStr;
+                } else {
+                    return false;
                 }
             } else {
-                String timeStr = LocalDateTime.now()
+                String timeStr = java.time.LocalDateTime.now()
                         .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                 saveName = "AutoSave_" + timeStr;
             }
 
-            // 执行保存
             boolean success = saveManager.saveGame(saveName, currentUser.getUsername(), model);
             if (success) {
                 JOptionPane.showMessageDialog(this, "游戏已保存为: " + saveName);
+                return true;
             } else {
-                JOptionPane.showMessageDialog(this, "保存失败！可能是文件名包含非法字符。");
+                JOptionPane.showMessageDialog(this, "保存失败！");
+                return true;
             }
+        } else if (option == JOptionPane.NO_OPTION) {
+            return true;
+        } else {
+            return false;
         }
+    }
+
+    // 禁用游戏控制按钮
+    private void disableControlButtons() {
+        undoButton.setEnabled(false);
+        saveButton.setEnabled(false);
+        loadButton.setEnabled(false); // 读档通常允许，因为这相当于重新开始，看你需求
+        restartButton.setEnabled(true); // 重新开始永远允许
+        surrenderButton.setEnabled(false);
+        drawButton.setEnabled(false);
+        boardPanel.setEnabled(false);
+    }
+
+    // 启用游戏控制按钮
+    private void enableControlButtons() {
+        undoButton.setEnabled(true);
+        saveButton.setEnabled(!currentUser.isGuest);
+        loadButton.setEnabled(!currentUser.isGuest);
+        surrenderButton.setEnabled(true);
+        drawButton.setEnabled(true);
+        boardPanel.setEnabled(true);
     }
 }

@@ -672,4 +672,11 @@ public class ChessBoardModel {
 
         System.out.println("测试局加载完成。预期结果：红方困毙判负。当前GameState: " + this.gameState);
     }
+
+    /**
+     * 获取按时间顺序排列的移动历史列表（用于gameReplay）
+     */
+    public List<MoveRecord> getMoveHistoryList() {
+        return new ArrayList<>(moveHistory);
+    }
 }

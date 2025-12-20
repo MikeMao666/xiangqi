@@ -40,36 +40,45 @@ public class XiangqiApplication {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // 标题
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
         JLabel titleLabel = new JLabel("中国象棋", JLabel.CENTER);
         titleLabel.setFont(new Font("楷体", Font.BOLD, 24));
         titleLabel.setForeground(new Color(180, 0, 0));
         loginFrame.add(titleLabel, gbc);
 
         // 用户名标签和输入框
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
         JLabel usernameLabel = new JLabel("用户名:");
         usernameLabel.setFont(new Font("宋体", Font.PLAIN, 14));
         loginFrame.add(usernameLabel, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
         usernameField = new JTextField(15);
         usernameField.setFont(new Font("宋体", Font.PLAIN, 14));
         loginFrame.add(usernameField, gbc);
 
         // 密码标签和输入框
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         JLabel passwordLabel = new JLabel("密码:");
         passwordLabel.setFont(new Font("宋体", Font.PLAIN, 14));
         loginFrame.add(passwordLabel, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
         passwordField = new JPasswordField(15);
         passwordField.setFont(new Font("宋体", Font.PLAIN, 14));
         loginFrame.add(passwordField, gbc);
 
         // 按钮面板
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.setBackground(new Color(240, 240, 240));
 
@@ -96,14 +105,18 @@ public class XiangqiApplication {
         loginFrame.add(buttonPanel, gbc);
 
         // 状态标签
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
         statusLabel = new JLabel(" ", JLabel.CENTER);
         statusLabel.setForeground(Color.RED);
         statusLabel.setFont(new Font("宋体", Font.PLAIN, 12));
         loginFrame.add(statusLabel, gbc);
 
         // 功能说明
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
         JTextArea infoArea = new JTextArea(
                 "功能说明:\n" +
                         "• 注册用户: 可以保存和加载游戏\n" +
@@ -200,8 +213,8 @@ public class XiangqiApplication {
         gameFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                gameFrame.checkAndSaveOnExit();
-                System.exit(0);
+                if (gameFrame.checkAndSaveOnExit())//判断是否退出
+                    System.exit(0);
             }
         });
 
