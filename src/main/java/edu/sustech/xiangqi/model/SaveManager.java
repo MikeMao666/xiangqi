@@ -13,7 +13,6 @@ public class SaveManager {
 
     public SaveManager() {
         this.objectMapper = new ObjectMapper();
-        new File(SAVE_DIR).mkdirs();
     }
 
     public boolean saveGame(String saveName, String username, ChessBoardModel model) {
@@ -55,20 +54,38 @@ public class SaveManager {
         }
     }
 
-    public List<String> getUserSaves(String username) {
+    public List<Save> getUserSaves(String username) {
         File saveDir = new File(SAVE_DIR);
         File[] files = saveDir.listFiles((dir, name) -> name.startsWith(username + "_") && name.endsWith(".json"));
 
+        List<Save> saves = new ArrayList<>();
         if (files == null) {
-            return new ArrayList<>();
+            return saves;
         }
 
-        return Arrays.stream(files)
-                .map(file -> {
-                    String name = file.getName();
-                    return name.substring((username + "_").length(), name.length() - 5);
-                })
-                .collect(Collectors.toList());
+        for (File file : files) {
+            try {
+                // 读取存档对象
+                Save save = objectMapper.readValue(file, Save.class);
+                if (save != null && save.isValid()) {
+                    saves.add(save);
+                }
+            } catch (IOException e) {
+                System.err.println("读取存档列表失败: " + file.getName());
+            }
+        }
+
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 按时间倒序排序
+        saves.sort((s1, s2) -> {
+            // 解析字符串回 LocalDateTime 进行比较
+            java.time.LocalDateTime t1 = java.time.LocalDateTime.parse(s1.getSaveTime(), formatter);
+            java.time.LocalDateTime t2 = java.time.LocalDateTime.parse(s2.getSaveTime(), formatter);
+            return t2.compareTo(t1); // 倒序
+        });
+
+        return saves;
     }
 
     public boolean deleteSave(String saveName, String username) {

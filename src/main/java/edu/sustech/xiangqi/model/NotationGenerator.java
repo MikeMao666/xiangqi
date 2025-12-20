@@ -39,10 +39,10 @@ public class NotationGenerator {
      */
     private static String getColumnNotation(int col, boolean isRed) {
         if (isRed) {
-            // 红方视角：从右到左（9->一, 8->二, ..., 1->九, 0->?）
+            // 红方视角：从右到左
             return COLUMN_NOTATION_RED[8 - col];
         } else {
-            // 黑方视角：从左到右（0->1, 1->2, ..., 8->9）
+            // 黑方视角：从左到右
             return COLUMN_NOTATION_BLACK[col];
         }
     }
@@ -59,10 +59,10 @@ public class NotationGenerator {
             return "平" + toColNotation;
         else {
             if (piece.isRed()) {
-                // 红方：向前是行数减小
+                // 红方向前是行数减小
                 return (rowDiff < 0 ? "进" : "退") + (colDiff != 0 ? toColNotation : COLUMN_NOTATION_RED[Math.abs(rowDiff) - 1]);
             } else {
-                // 黑方：向前是行数增加
+                // 黑方向前是行数增加
                 return (rowDiff > 0 ? "进" : "退") + (colDiff != 0 ? toColNotation : COLUMN_NOTATION_BLACK[Math.abs(rowDiff) - 1]);
             }
         }

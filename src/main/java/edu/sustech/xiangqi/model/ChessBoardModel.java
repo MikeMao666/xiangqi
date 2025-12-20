@@ -125,7 +125,7 @@ public class ChessBoardModel {
     /**
      * 检查指定玩家是否被将军 - 专用方法
      */
-    private boolean isInCheckForPlayer(boolean forRed) {
+    public boolean isInCheckForPlayer(boolean forRed) {
         // 1. 找到指定玩家的将/帅
         GeneralPiece playerGeneral = null;
         for (AbstractPiece piece : pieces) {
@@ -173,9 +173,9 @@ public class ChessBoardModel {
                                 pieces.remove(captured);
                             }
 
-                            // 检查移动是否会导致将帅对面
+                            // 检查移动是否会导致将帅对面or被将军
                             boolean facingGenerals = willCauseFacingGeneralsAfterMove();
-
+                            boolean selfCheck = isInCheckForPlayer(forRed);
                             // 回退
                             piece.moveTo(originalRow, originalCol);
                             if (captured != null) {
@@ -183,7 +183,7 @@ public class ChessBoardModel {
                             }
 
                             // 如果有合法移动且不导致将帅对面，则不是困毙
-                            if (!facingGenerals) {
+                            if (!facingGenerals && !selfCheck) {
                                 return false; // 有合法走法
                             }
                         }
@@ -226,8 +226,14 @@ public class ChessBoardModel {
         } else {
             // 没有被将军，检查是否困毙
             if (checkForStalemate(isRedTurn)) {
-                gameState = GameState.DRAW;
-                victoryMessage = "和棋！困毙！";
+                //困毙判负
+                if (isRedTurn) {
+                    gameState = GameState.BLACK_WIN;
+                    victoryMessage = "红方无子可动（困毙）！黑方胜利！";
+                } else {
+                    gameState = GameState.RED_WIN;
+                    victoryMessage = "黑方无子可动（困毙）！红方胜利！";
+                }
                 return;
             }
         }
@@ -342,8 +348,8 @@ public class ChessBoardModel {
 
         piece.moveTo(newRow, newCol);
 
-        // 检查移动后是否会导致将帅对面 and 导致本方被将军
-        if (willCauseFacingGeneralsAfterMove() && isInCheckForPlayer(isRedTurn)) {
+        // 检查移动后是否会导致将帅对面 or 导致本方被将军
+        if (willCauseFacingGeneralsAfterMove() || isInCheckForPlayer(isRedTurn)) {
             // 如果会导致将帅对面，撤回
             piece.moveTo(originalRow, originalCol);
             if (targetPiece != null) {
@@ -457,7 +463,7 @@ public class ChessBoardModel {
     /**
      * 检查移动后是否会导致将帅直接对面
      */
-    private boolean willCauseFacingGeneralsAfterMove() {
+    public boolean willCauseFacingGeneralsAfterMove() {
         GeneralPiece redGeneral = null;
         GeneralPiece blackGeneral = null;
 
@@ -575,10 +581,12 @@ public class ChessBoardModel {
                 boolean isValidMove = this.movePiece(piece, toRow, toCol);
                 if (!isValidMove)
                     return false;
+
             }
 
-            // 设置正确的回合状态
-            this.isRedTurn = save.isRedTurn();
+            // 检查回合状态
+            if (this.isRedTurn != save.isRedTurn())
+                return false;
 
             return true;
 
@@ -616,5 +624,52 @@ public class ChessBoardModel {
 
         return formattedNotation;
 
+    }
+    /**
+     * 加载合法的困毙（红方判负）测试残局
+     */
+    public void loadStalemateTest() {
+        this.pieces.clear();
+        this.moveHistory.clear();
+        this.gameState = GameState.PLAYING; // 重置状态
+
+        // 1. 红帅 (9, 4)
+        pieces.add(new GeneralPiece("帅", 9, 4, true));
+
+        // 2. 黑将 (0, 5) - 错开一列，避免将帅直接对面
+        pieces.add(new GeneralPiece("將", 0, 5, false));
+
+        // 3. 这里的布局是为了封锁红帅的所有出路，但当前不将军
+
+        // 黑车A (8, 0): 封锁第8行 (红帅不能向上走)
+        pieces.add(new ChariotPiece("車", 8, 0, false));
+
+        // 黑车B (0, 3): 封锁第3列 (红帅不能向左走，会被这一列顶部的车吃掉)
+        pieces.add(new ChariotPiece("車", 0, 3, false));
+
+        // 黑车C (0, 5): 封锁第5列 (红帅不能向右走，会被这一列顶部的车吃掉)
+        // 注意：这里利用了黑将也在0行5列，但车在将的位置重叠是不行的。
+        // 我们把黑将改到 (0,4)（正位），车放 (1,5)
+        // 修正方案：
+        pieces.clear();
+        pieces.add(new GeneralPiece("帅", 9, 4, true)); // 红帅
+        pieces.add(new GeneralPiece("將", 0, 5, false)); // 黑将(错开)
+
+        // 封锁上路：黑车在 (8,0) 控制第8行
+        pieces.add(new ChariotPiece("車", 8, 0, false));
+
+        // 封锁左路：黑车在 (1,3) 控制第3列
+        pieces.add(new ChariotPiece("車", 1, 3, false));
+
+        // 封锁右路：黑车在 (1,5) 控制第5列
+        pieces.add(new ChariotPiece("車", 1, 5, false));
+
+        // 强制红方回合
+        this.isRedTurn = true;
+
+        // 立即计算状态
+        updateGameState();
+
+        System.out.println("测试局加载完成。预期结果：红方困毙判负。当前GameState: " + this.gameState);
     }
 }

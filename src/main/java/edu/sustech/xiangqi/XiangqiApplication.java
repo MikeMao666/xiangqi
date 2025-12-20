@@ -194,16 +194,13 @@ public class XiangqiApplication {
         GameFrame gameFrame = new GameFrame("中国象棋", currentUser);
 
         // 设置游戏窗口关闭时的行为
-        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         // 添加窗口监听器
         gameFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // 可选：自动保存功能
-                if (currentUser != null && !currentUser.isGuest) {
-                    // autoSaveOnExit(gameFrame);
-                }
+                gameFrame.checkAndSaveOnExit();
                 System.exit(0);
             }
         });
@@ -212,22 +209,6 @@ public class XiangqiApplication {
         loginFrame.dispose();
     }
 
-    /**
-     * 退出时自动保存(bonus, 未完成)
-     */
-    private static void autoSaveOnExit(GameFrame gameFrame) {
-        int option = JOptionPane.showConfirmDialog(
-                gameFrame,
-                "是否在退出前自动保存当前游戏？",
-                "自动保存",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (option == JOptionPane.YES_OPTION) {
-            // gameFrame.autoSave();
-            JOptionPane.showMessageDialog(gameFrame, "游戏已自动保存");
-        }
-    }
 
     public static User getCurrentUser() {
         return currentUser;

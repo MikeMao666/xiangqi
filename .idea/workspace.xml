@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15" />
+    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/saves/test01_01.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/saves/test01_将死测试.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/ChessBoardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/ChessBoardModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/NotationGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/NotationGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,6 +49,9 @@
     &quot;accountId&quot;: &quot;96db10e1-b4eb-4b58-b57e-35d0227ba5e0&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -48,6 +62,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -72,7 +87,7 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="未命名" type="Application" factoryName="Application" nameIsGenerated="true">
+    <configuration name="XiangqiApplication" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="edu.sustech.xiangqi.XiangqiApplication" />
@@ -80,15 +95,6 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
-    </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
     </configuration>
   </component>
   <component name="TaskManager">
@@ -115,7 +121,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765874821651</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况">
+      <option name="closed" value="true" />
+      <created>1765877069371</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765877069371</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -145,19 +159,29 @@
     <MESSAGE value="Create README.md" />
     <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置" />
     <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15" />
+    <MESSAGE value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: 添加用户注册、登录和棋谱记录功能&#10;&#10;- 新增用户注册对话框(RegisterDialog)&#10;- 添加用户管理(UserManager)和用户实体(User)&#10;- 实现棋谱记录功能(MoveRecord, NotationAnalyzer, NotationGenerator)&#10;- 添加棋谱面板(NotationPanel)&#10;- 实现存档保存功能(Save, SaveManager)&#10;- 完善README文档&#10;- 重构棋子类文件位置&#10;&#10;-12/15&#10;&#10;12/16&#10;-移动后本方被将军情况" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/pieces/AbstractPiece.java</url>
-          <line>50</line>
-          <properties class="edu.sustech.xiangqi.model.pieces.AbstractPiece">
+        <line-breakpoint type="java-method">
+          <url>file://$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/ChessBoardModel.java</url>
+          <line>561</line>
+          <properties class="edu.sustech.xiangqi.model.ChessBoardModel" method="loadFromNotationSave">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
-          <option name="timeStamp" value="5" />
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java</url>
+          <line>124</line>
+          <properties class="edu.sustech.xiangqi.ui.GameFrame" method="handleSave">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class GameFrame extends JFrame {
     private ChessBoardModel model;
@@ -19,7 +21,8 @@ public class GameFrame extends JFrame {
     private JButton drawButton;
     private Timer victoryTimer;
     private boolean victoryDialogShowing = false;
-
+    // 新增：记录当前加载的存档名称
+    private String currentLoadedSaveName = null;
     public GameFrame(String title, User user) {
         this.currentUser = user;
         this.saveManager = new SaveManager();
@@ -125,11 +128,46 @@ public class GameFrame extends JFrame {
             return;
         }
 
-        String saveName = JOptionPane.showInputDialog(this, "请输入存档名称:");
-        if (saveName != null && !saveName.trim().isEmpty()) {
-            boolean success = saveManager.saveGame(saveName.trim(), currentUser.getUsername(), model);
+        String saveName = null;
+
+        // 情况1：当前是读档进来的游戏
+        if (currentLoadedSaveName != null) {
+            Object[] options = {"新建存档", "覆盖原存档", "取消"};
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "当前游戏读取自: " + currentLoadedSaveName + "\n您希望如何保存？",
+                    "保存选项",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) { // 新建存档
+                String inputName = JOptionPane.showInputDialog(this, "请输入新存档名称:");
+                if (inputName != null && !inputName.trim().isEmpty()) {
+                    saveName = inputName.trim();
+                }
+            } else if (choice == 1) { // 覆盖原存档
+                saveName = currentLoadedSaveName;
+            }
+        }
+        // 情况2：这是新游戏，直接新建
+        else {
+            String inputName = JOptionPane.showInputDialog(this, "请输入存档名称:");
+            if (inputName != null && !inputName.trim().isEmpty()) {
+                saveName = inputName.trim();
+            }
+        }
+
+        // 执行保存
+        if (saveName != null) {
+            boolean success = saveManager.saveGame(saveName, currentUser.getUsername(), model);
             if (success) {
-                JOptionPane.showMessageDialog(this, "存档成功");
+                // 如果是新建存档，更新当前记录，这样下次再点保存就可以选择覆盖了
+                this.currentLoadedSaveName = saveName;
+                JOptionPane.showMessageDialog(this, "存档成功！");
             } else {
                 JOptionPane.showMessageDialog(this, "存档失败");
             }
@@ -142,26 +180,62 @@ public class GameFrame extends JFrame {
             return;
         }
 
-        java.util.List<String> userSaves = saveManager.getUserSaves(currentUser.getUsername());
+        List<Save> userSaves = saveManager.getUserSaves(currentUser.getUsername());
         if (userSaves.isEmpty()) {
             JOptionPane.showMessageDialog(this, "没有找到存档");
             return;
         }
 
-        String[] saveArray = userSaves.toArray(new String[0]);
-        String selectedSave = (String) JOptionPane.showInputDialog(
-                this, "选择要加载的存档:", "读档",
-                JOptionPane.QUESTION_MESSAGE, null, saveArray, saveArray[0]);
+        Object[] selectionValues = new Object[userSaves.size()];
+         for (int i = 0; i < userSaves.size(); i++) {
+        Save s = userSaves.get(i);
+        String displayHtml = String.format(
+            "<html><body style='width: 200px'>" +
+            "<b>%s</b><br>" +
+            "<span style='color: gray; font-size: 8px'>%s</span>" +
+            "</body></html>",
+            s.getSaveName(),
+            s.getSaveTime()
+        );
+        selectionValues[i] = displayHtml;
+    }
 
-        if (selectedSave != null) {
-            Save save = saveManager.loadGame(selectedSave, currentUser.getUsername());
-            if (save != null && model.loadFromNotationSave(save)) {
-                label.setText("读档成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
-                boardPanel.repaint();
-                notationPanel.updateNotation();
-                JOptionPane.showMessageDialog(this, "读档成功");
-            } else {
-                JOptionPane.showMessageDialog(this, "读档失败，存档可能已损坏");
+        // 弹出选择框
+        String selectedHtml = (String) JOptionPane.showInputDialog(
+                this,
+                "选择要加载的存档:",
+                "读档",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                selectionValues,
+                selectionValues[0]);
+
+        if (selectedHtml != null) {
+            // 根据选中的HTML字符串找回对应的Save对象（通过索引或者名字匹配）
+            int selectedIndex = -1;
+            for (int i = 0; i < selectionValues.length; i++) {
+                if (selectionValues[i].equals(selectedHtml)) {
+                    selectedIndex = i;
+                    break;
+                }
+            }
+
+            if (selectedIndex != -1) {
+                Save selectedSave = userSaves.get(selectedIndex);
+                if (model.loadFromNotationSave(selectedSave)) {
+                    this.currentLoadedSaveName = selectedSave.getSaveName();
+                    label.setText("读档成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+                    boardPanel.repaint();
+                    notationPanel.updateNotation();
+
+                    // 重启胜利检测计时器
+                    victoryDialogShowing = false;
+                    if (victoryTimer != null) victoryTimer.start();
+
+                    JOptionPane.showMessageDialog(this, "读档成功");
+                } else {
+                    JOptionPane.showMessageDialog(this, "读档失败，存档可能已损坏");
+                }
             }
         }
     }
@@ -249,10 +323,7 @@ public class GameFrame extends JFrame {
             // 强制刷新界面
             revalidate();
             repaint();
-        } else if (state == ChessBoardModel.GameState.PLAYING) {
-            // 如果游戏还在进行中，检查将军状态并更新显示
-            boardPanel.updateCheckStatus();
-        }
+        } 
     }
 
     /**
@@ -367,6 +438,7 @@ public class GameFrame extends JFrame {
      */
     private void handleRestart() {
         model.resetGame();
+        this.currentLoadedSaveName = null;
         label.setText("红方回合");
         boardPanel.repaint();
         notationPanel.updateNotation();
@@ -380,5 +452,80 @@ public class GameFrame extends JFrame {
 
         // 重启计时器
         victoryTimer.start();
+//        model.loadStalemateTest();
+//
+//        label.setText("测试模式：红方困毙局面");
+//        boardPanel.repaint();
+//        notationPanel.updateNotation();
+//
+//        // 重新启用按钮
+//        boardPanel.setEnabled(true);
+//        surrenderButton.setEnabled(true);
+//        drawButton.setEnabled(true);
+//        victoryDialogShowing = false;
+//
+//        if (victoryTimer != null) victoryTimer.start();
+//
+//        // 强制检查一次状态
+//        checkGameState();
+    }
+    public void checkAndSaveOnExit() {
+        // 游客不保存
+        if (currentUser.isGuest) {
+            return;
+        }
+
+        // 游戏已经结束也不用保存
+        if (model.getGameState() != ChessBoardModel.GameState.PLAYING) {
+            return;
+        }
+
+        int option = JOptionPane.showConfirmDialog(
+                this,
+                "正在退出游戏，是否保存当前进度？",
+                "退出保存",
+                JOptionPane.YES_NO_CANCEL_OPTION
+        );
+
+        if (option == JOptionPane.YES_OPTION) {
+            String saveName;
+
+            //如果当前是读档进来的，询问是否覆盖
+            if (currentLoadedSaveName != null) {
+                Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档"};
+                int saveChoice = JOptionPane.showOptionDialog(
+                        this,
+                        "当前游戏读取自: " + currentLoadedSaveName + "\n您希望如何保存？",
+                        "保存选项",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+
+                if (saveChoice == 0) {
+                    // 选择覆盖
+                    saveName = currentLoadedSaveName;
+                } else {
+                    // 选择另存为
+                    String timeStr = LocalDateTime.now()
+                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                    saveName = "AutoSave_" + timeStr;
+                }
+            } else {
+                String timeStr = LocalDateTime.now()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                saveName = "AutoSave_" + timeStr;
+            }
+
+            // 执行保存
+            boolean success = saveManager.saveGame(saveName, currentUser.getUsername(), model);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "游戏已保存为: " + saveName);
+            } else {
+                JOptionPane.showMessageDialog(this, "保存失败！可能是文件名包含非法字符。");
+            }
+        }
     }
 }

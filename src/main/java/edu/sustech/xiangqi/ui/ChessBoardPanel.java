@@ -128,6 +128,35 @@ public class ChessBoardPanel extends JPanel {
         for (int row = 0; row < ChessBoardModel.getRows(); row++) {
             for (int col = 0; col < ChessBoardModel.getCols(); col++) {
                 if (selectedPiece.canMoveTo(row, col, model)) {
+                    //额外检查移动棋子是否会导致将帅对面 or 导致本方被将军
+
+                    // 保存原始位置
+                    int originalRow = selectedPiece.getRow();
+                    int originalCol = selectedPiece.getCol();
+                    // 获取目标位置的棋子（可能被吃掉）
+                    AbstractPiece targetPiece = model.getPieceAt(row, col);
+                    List<AbstractPiece> pieces = new ArrayList<>(model.getPieces());
+                    // 临时移动棋子检查是否会导致将帅对面
+                    if (targetPiece != null && targetPiece.isRed() != selectedPiece.isRed()) {
+                        // 临时移除被吃的棋子
+                        pieces.remove(targetPiece);
+                    }
+
+                    selectedPiece.moveTo(row, col);
+
+                    // 检查移动后是否会导致将帅对面 or 导致本方被将军
+                    if (model.willCauseFacingGeneralsAfterMove() || model.isInCheckForPlayer(selectedPiece.isRed())) {
+                        // 如果会导致将帅对面，撤回
+                        selectedPiece.moveTo(originalRow, originalCol);
+                        if (targetPiece != null) {
+                            pieces.add(targetPiece);
+                        }
+                        continue;
+                    }
+                    selectedPiece.moveTo(originalRow, originalCol);
+                    if (targetPiece != null) {
+                        pieces.add(targetPiece);
+                    }
                     validMoves.add(new Point(row, col));
                 }
             }
@@ -206,21 +235,57 @@ public class ChessBoardPanel extends JPanel {
             int centerX = MARGIN + p.y * CELL_SIZE;
             int centerY = MARGIN + p.x * CELL_SIZE;
             int diameter = PIECE_RADIUS * 2 - 4; // 比棋子略小，不抢焦点
+// 检查目标位置是否有对方棋子（吃子场景）
+            AbstractPiece targetPiece = model.getPieceAt(p.x, p.y);
+            boolean isCapture = targetPiece != null && targetPiece.isRed() != selectedPiece.isRed();
 
-            // 渐变绿色（浅绿→深绿，透明度80%）
-            GradientPaint moveGradient = new GradientPaint(centerX - PIECE_RADIUS, centerY - PIECE_RADIUS,
-                    new Color(0, 255, 0, 80),
-                    centerX + PIECE_RADIUS, centerY + PIECE_RADIUS,
-                    new Color(0, 200, 0, 80));
-            g2d.setPaint(moveGradient);
-            // 圆角椭圆填充（更柔和）
-            g2d.fillOval(centerX - PIECE_RADIUS + 2, centerY - PIECE_RADIUS + 2,
-                    diameter, diameter);
-            // 细边框（增加轮廓）
-            g2d.setColor(new Color(0, 180, 0, 120));
-            g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2d.drawOval(centerX - PIECE_RADIUS + 2, centerY - PIECE_RADIUS + 2,
-                    diameter, diameter);
+            if (isCapture) {
+                // 吃子位置：绿框
+                g2d.setColor(new Color(0, 180, 0, 120));
+                g2d.setStroke(new BasicStroke(3));
+                int cornerSize = 26;
+                int lineLength = 12;
+
+                // 选中效果的边框实际上是8条line，每两个line组成一个角落的边框
+
+                // 左上角的边框
+                g2d.drawLine(centerX - cornerSize, centerY - cornerSize,
+                        centerX - cornerSize + lineLength, centerY - cornerSize);
+                g2d.drawLine(centerX - cornerSize, centerY - cornerSize,
+                        centerX - cornerSize, centerY - cornerSize + lineLength);
+                // 右上角的边框
+                g2d.drawLine(centerX + cornerSize, centerY - cornerSize,
+                        centerX + cornerSize - lineLength, centerY - cornerSize);
+                g2d.drawLine(centerX + cornerSize, centerY - cornerSize,
+                        centerX + cornerSize, centerY - cornerSize + lineLength);
+
+                // 左下角的边框
+                g2d.drawLine(centerX - cornerSize, centerY + cornerSize,
+                        centerX - cornerSize + lineLength, centerY + cornerSize);
+                g2d.drawLine(centerX - cornerSize, centerY + cornerSize,
+                        centerX - cornerSize, centerY + cornerSize - lineLength);
+
+                // 右下角的边框
+                g2d.drawLine(centerX + cornerSize, centerY + cornerSize,
+                        centerX + cornerSize - lineLength, centerY + cornerSize);
+                g2d.drawLine(centerX + cornerSize, centerY + cornerSize,
+                        centerX + cornerSize, centerY + cornerSize - lineLength);
+            } else {
+                // 渐变绿色（浅绿→深绿，透明度80%）
+                GradientPaint moveGradient = new GradientPaint(centerX - PIECE_RADIUS, centerY - PIECE_RADIUS,
+                        new Color(0, 255, 0, 80),
+                        centerX + PIECE_RADIUS, centerY + PIECE_RADIUS,
+                        new Color(0, 200, 0, 80));
+                g2d.setPaint(moveGradient);
+                // 圆角椭圆填充（更柔和）
+                g2d.fillOval(centerX - PIECE_RADIUS + 2, centerY - PIECE_RADIUS + 2,
+                        diameter, diameter);
+                // 细边框（增加轮廓）
+                g2d.setColor(new Color(0, 180, 0, 120));
+                g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2d.drawOval(centerX - PIECE_RADIUS + 2, centerY - PIECE_RADIUS + 2,
+                        diameter, diameter);
+            }
         }
     }
 
