@@ -648,9 +648,6 @@ public class ChessBoardModel {
         pieces.add(new ChariotPiece("車", 0, 3, false));
 
         // 黑车C (0, 5): 封锁第5列 (红帅不能向右走，会被这一列顶部的车吃掉)
-        // 注意：这里利用了黑将也在0行5列，但车在将的位置重叠是不行的。
-        // 我们把黑将改到 (0,4)（正位），车放 (1,5)
-        // 修正方案：
         pieces.clear();
         pieces.add(new GeneralPiece("帅", 9, 4, true)); // 红帅
         pieces.add(new GeneralPiece("將", 0, 5, false)); // 黑将(错开)
@@ -678,5 +675,20 @@ public class ChessBoardModel {
      */
     public List<MoveRecord> getMoveHistoryList() {
         return new ArrayList<>(moveHistory);
+    }
+
+    /**
+     * 触发超时判负
+     */
+    public void triggerTimeout(boolean isRedTimeout) {
+        if (gameState != GameState.PLAYING) return;
+
+        if (isRedTimeout) {
+            gameState = GameState.BLACK_WIN;
+            victoryMessage = "红方超时！黑方胜利！";
+        } else {
+            gameState = GameState.RED_WIN;
+            victoryMessage = "黑方超时！红方胜利！";
+        }
     }
 }

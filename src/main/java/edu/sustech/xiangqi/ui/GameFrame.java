@@ -5,9 +5,7 @@ import edu.sustech.xiangqi.model.user.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameFrame extends JFrame {
@@ -30,10 +28,22 @@ public class GameFrame extends JFrame {
     // 记录当前加载的存档名称
     private String currentLoadedSaveName = null;
 
-    public GameFrame(String title, User user) {
+    private GameConfig config;
+    private Timer gameClock;
+    private int redTimeRemaining;
+    private int blackTimeRemaining;
+    private JLabel redTimerLabel;
+    private JLabel blackTimerLabel;
+    private JPanel rightPanel;
+
+    public GameFrame(String title, User user, GameConfig config) {
         this.currentUser = user;
         this.saveManager = new SaveManager();
-        this.setTitle(title + " - " + user.getUsername());
+        this.config = config != null ? config : new GameConfig();
+
+        this.setTitle(title + " - " + user.getUsername() +
+                (this.config.getMode() == GameConfig.Mode.TIMED ? String.format("[计时 %d分+%d秒]", config.getInitialTimeSeconds() / 60, config.getIncrementSeconds()) : ""));
+
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -46,22 +56,32 @@ public class GameFrame extends JFrame {
         boardPanel.setNotationPanel(notationPanel);
         mainPanel.add(boardPanel, BorderLayout.CENTER);
 
-        // 右侧面板（状态和按钮）
-        JPanel rightPanel = new JPanel();
+        // 右侧面板
+        rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setPreferredSize(new Dimension(200, 600));
+        rightPanel.setPreferredSize(new Dimension(220, 600));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // 计时模式，先添加计时器到右侧面板顶部
+        if (this.config.getMode() == GameConfig.Mode.TIMED) {
+            initTimers(); // 初始化并添加到 rightPanel
+        }
+
+        // 状态标签
         label = new JLabel("红方回合");
-        boardPanel.setLabel(label);
+        label.setFont(new Font("宋体", Font.BOLD, 16));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        boardPanel.setLabel(label);
+        rightPanel.add(Box.createVerticalStrut(10));
+        rightPanel.add(label);
+        rightPanel.add(Box.createVerticalStrut(10));
 
-        // 棋谱面板
-        notationPanel = new NotationPanel(model);
-        boardPanel.setNotationPanel(notationPanel);
+        // 棋谱
+        rightPanel.add(notationPanel);
+        rightPanel.add(Box.createVerticalStrut(10));
 
-        // 按钮面板
+        // 按钮
         JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 5, 5));
-
         undoButton = new JButton("悔棋");
         restartButton = new JButton("重新开始");
         saveButton = new JButton("存档");
@@ -71,12 +91,18 @@ public class GameFrame extends JFrame {
 
         saveButton.setEnabled(!currentUser.isGuest);
         loadButton.setEnabled(!currentUser.isGuest);
-
-        // 设置按钮颜色
         surrenderButton.setBackground(new Color(220, 20, 60));
         surrenderButton.setForeground(Color.WHITE);
         drawButton.setBackground(new Color(30, 144, 255));
         drawButton.setForeground(Color.WHITE);
+
+        // 添加监听器 (代码不变)
+        undoButton.addActionListener(e -> handleUndo());
+        restartButton.addActionListener(e -> handleRestart());
+        saveButton.addActionListener(e -> handleSave());
+        loadButton.addActionListener(e -> handleLoad());
+        surrenderButton.addActionListener(e -> handleSurrender());
+        drawButton.addActionListener(e -> handleDraw());
 
         buttonPanel.add(undoButton);
         buttonPanel.add(restartButton);
@@ -85,44 +111,39 @@ public class GameFrame extends JFrame {
         buttonPanel.add(surrenderButton);
         buttonPanel.add(drawButton);
 
-        undoButton.addActionListener(e -> handleUndo());
-        restartButton.addActionListener(e -> handleRestart());
-        saveButton.addActionListener(e -> handleSave());
-        loadButton.addActionListener(e -> handleLoad());
-        surrenderButton.addActionListener(e -> handleSurrender());
-        drawButton.addActionListener(e -> handleDraw());
-
-        rightPanel.add(label);
-        rightPanel.add(notationPanel);
+        // 设置按钮最大高度，防止拉伸太难看
+        buttonPanel.setMaximumSize(new Dimension(200, 300));
         rightPanel.add(buttonPanel);
 
         mainPanel.add(rightPanel, BorderLayout.EAST);
-
         this.add(mainPanel);
-        this.setSize(1000, 700);
+        this.setSize(1000, 750);
         this.setLocationRelativeTo(null);
 
-        // 创建胜利播报计时器
-        victoryTimer = new Timer(100, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkGameState();
-            }
-        });
+        // 计时器
+        victoryTimer = new Timer(100, e -> checkGameState());
         victoryTimer.start();
     }
 
     private void handleUndo() {
         if (model.canUndo()) {
-            boolean success = model.undoMove();
-            if (success) {
-                label.setText("悔棋成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
-                boardPanel.repaint();
-                notationPanel.updateNotation();
-                // 更新将军状态显示
-                boardPanel.updateCheckStatus();
+            String message = (model.isRedTurn() ? "黑方" : "红方") + "请求悔棋，" + (model.isRedTurn() ? "红方" : "黑方") + "同意吗？";
+
+            int response = JOptionPane.showConfirmDialog(this, message, "悔棋请求", JOptionPane.YES_NO_OPTION);
+
+            if (response == JOptionPane.YES_OPTION) {
+                boolean success = model.undoMove();
+                if (success) {
+                    label.setText("悔棋成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
+                    boardPanel.repaint();
+                    notationPanel.updateNotation();
+
+                    boardPanel.updateCheckStatus();
+                } else {
+                    label.setText("悔棋失败");
+                }
             } else {
-                label.setText("悔棋失败");
+                label.setText("对方拒绝了悔棋请求");
             }
         } else {
             label.setText("无法悔棋，没有历史记录");
@@ -130,16 +151,19 @@ public class GameFrame extends JFrame {
     }
 
     private void handleSave() {
+        // 1. 游客检查
         if (currentUser.isGuest) {
             JOptionPane.showMessageDialog(this, "游客模式无法存档");
             return;
         }
+        boolean wasRunning = (gameClock != null && gameClock.isRunning());
+        if (wasRunning) gameClock.stop();
+        String saveName;
 
-        String saveName = null;
-
-        // 情况1：当前是读档进来的游戏
+        // 2. 确定存档名称 (覆盖 or 新建)
         if (currentLoadedSaveName != null) {
-            Object[] options = {"新建存档", "覆盖原存档", "取消"};
+            // 如果是读档进来的，询问是否覆盖
+            Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档", "取消"};
             int choice = JOptionPane.showOptionDialog(
                     this,
                     "当前游戏读取自: " + currentLoadedSaveName + "\n您希望如何保存？",
@@ -151,66 +175,145 @@ public class GameFrame extends JFrame {
                     options[0]
             );
 
-            if (choice == 0) { // 新建存档
+            if (choice == 0) { // 覆盖
+                saveName = currentLoadedSaveName;
+            } else if (choice == 1) { // 另存为
                 String inputName = JOptionPane.showInputDialog(this, "请输入新存档名称:");
                 if (inputName != null && !inputName.trim().isEmpty()) {
                     saveName = inputName.trim();
+                } else {
+                    return;
                 }
-            } else if (choice == 1) { // 覆盖原存档
-                saveName = currentLoadedSaveName;
+            } else { // 取消
+                return;
             }
-        }
-        // 情况2：这是新游戏，直接新建
-        else {
+        } else {
+            // 如果是新开局，直接新建
             String inputName = JOptionPane.showInputDialog(this, "请输入存档名称:");
             if (inputName != null && !inputName.trim().isEmpty()) {
                 saveName = inputName.trim();
+            } else {
+                return;
             }
         }
 
-        // 执行保存
+        // 3. 执行保存逻辑
         if (saveName != null) {
-            boolean success = saveManager.saveGame(saveName, currentUser.getUsername(), model);
-            if (success) {
-                // 如果是新建存档，更新当前记录，这样下次再点保存就可以选择覆盖了
+            try {
+                // 获取棋谱步骤
+                List<String> moves = model.getMoveNotations();
+                Save save;
+
+                if (config.getMode() == GameConfig.Mode.TIMED) {
+                    // 计时模式：保存时间信息
+                    save = new Save(
+                            saveName,
+                            currentUser.getUsername(),
+                            model.isRedTurn(),
+                            moves,
+                            config.getInitialTimeSeconds(),
+                            config.getIncrementSeconds(),
+                            redTimeRemaining,
+                            blackTimeRemaining
+                    );
+                } else {
+                    // 普通模式：时间字段设为 0
+                    save = new Save(
+                            saveName,
+                            currentUser.getUsername(),
+                            model.isRedTurn(),
+                            moves
+                    );
+                }
+
+                //直接写入文件
+                java.io.File saveDir = new java.io.File("resources/saves");
+
+                java.io.File saveFile = new java.io.File(saveDir, currentUser.getUsername() + "_" + saveName + ".json");
+
+                new com.fasterxml.jackson.databind.ObjectMapper()
+                        .writerWithDefaultPrettyPrinter()
+                        .writeValue(saveFile, save);
+
+                // 更新当前存档名记录
                 this.currentLoadedSaveName = saveName;
                 JOptionPane.showMessageDialog(this, "存档成功！");
-            } else {
-                JOptionPane.showMessageDialog(this, "存档失败");
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "保存失败: " + ex.getMessage());
+            } finally {
+                if (wasRunning && model.getGameState() == ChessBoardModel.GameState.PLAYING) {
+                    gameClock.start();
+                }
             }
         }
     }
 
     private void handleLoad() {
+        // 游客检查
         if (currentUser.isGuest) {
             JOptionPane.showMessageDialog(this, "游客模式无法读档");
             return;
         }
-
-        List<Save> userSaves = saveManager.getUserSaves(currentUser.getUsername());
-        if (userSaves.isEmpty()) {
+        boolean wasRunning = (gameClock != null && gameClock.isRunning());
+        if (wasRunning) gameClock.stop();
+        // 获取所有存档
+        List<Save> allSaves = saveManager.getUserSaves(currentUser.getUsername());
+        if (allSaves.isEmpty()) {
             JOptionPane.showMessageDialog(this, "没有找到存档");
             return;
         }
 
-        Object[] selectionValues = new Object[userSaves.size()];
-        for (int i = 0; i < userSaves.size(); i++) {
-            Save s = userSaves.get(i);
+        // 计时模式只能看计时存档，普通模式只能看普通存档
+        boolean isCurrentTimed = (config.getMode() == GameConfig.Mode.TIMED);
+
+        List<Save> filteredSaves = new ArrayList<>();
+        for (Save s : allSaves) {
+            if (isCurrentTimed) {
+                // 计时模式只保留带有时间信息的存档
+                if (s.isTimedGame()) {
+                    filteredSaves.add(s);
+                }
+            } else {
+                // 普通模式只保留普通存档
+                if (!s.isTimedGame()) {
+                    filteredSaves.add(s);
+                }
+            }
+        }
+
+        if (filteredSaves.isEmpty()) {
+            String msg = isCurrentTimed ? "没有找到符合当前【计时模式】的存档" : "没有找到符合当前【普通模式】的存档";
+            JOptionPane.showMessageDialog(this, msg);
+            return;
+        }
+
+        // 构建显示列表 (HTML格式化)
+        Object[] selectionValues = new Object[filteredSaves.size()];
+        for (int i = 0; i < filteredSaves.size(); i++) {
+            Save s = filteredSaves.get(i);
+
+            // 额外显示赛制信息
+            String modeInfo = s.isTimedGame()
+                    ? String.format("[计时 %d分+%d秒]", s.getInitialTime() / 60, s.getIncrementTime())
+                    : "[普通模式]";
+
             String displayHtml = String.format(
-                    "<html><body style='width: 200px'>" +
-                            "<b>%s</b><br>" +
-                            "<span style='color: gray; font-size: 8px'>%s</span>" +
+                    "<html><body style='width: 250px'>" +
+                            "<b>%s</b> <span style='color: blue'>%s</span><br>" +
+                            "<span style='color: gray; font-size: 9px'>%s</span>" +
                             "</body></html>",
                     s.getSaveName(),
+                    modeInfo,
                     s.getSaveTime()
             );
             selectionValues[i] = displayHtml;
         }
 
-        // 弹出选择框
+        //弹出选择框
         String selectedHtml = (String) JOptionPane.showInputDialog(
                 this,
-                "选择要加载的存档:",
+                "选择要加载的存档 (已过滤不兼容模式):",
                 "读档",
                 JOptionPane.PLAIN_MESSAGE,
                 null,
@@ -218,7 +321,7 @@ public class GameFrame extends JFrame {
                 selectionValues[0]);
 
         if (selectedHtml != null) {
-            // 根据选中的HTML字符串找回对应的Save对象（通过索引或者名字匹配）
+            // 找回选中的 Save 对象
             int selectedIndex = -1;
             for (int i = 0; i < selectionValues.length; i++) {
                 if (selectionValues[i].equals(selectedHtml)) {
@@ -228,14 +331,32 @@ public class GameFrame extends JFrame {
             }
 
             if (selectedIndex != -1) {
-                Save selectedSave = userSaves.get(selectedIndex);
+                Save selectedSave = filteredSaves.get(selectedIndex);
+
+                //  执行加载
                 if (model.loadFromNotationSave(selectedSave)) {
                     this.currentLoadedSaveName = selectedSave.getSaveName();
+
+                    //恢复时间
+                    if (isCurrentTimed) {
+                        this.redTimeRemaining = selectedSave.getRedTimeLeft();
+                        this.blackTimeRemaining = selectedSave.getBlackTimeLeft();
+
+                        // 立即刷新界面显示
+                        updateTimerLabels();
+
+                        // 确保时钟正在运行 (如果之前暂停了)
+                        if (gameClock != null && !gameClock.isRunning()) {
+                            gameClock.start();
+                        }
+                    }
+
+                    // 刷新通用界面
                     label.setText("读档成功，" + (model.isRedTurn() ? "红方" : "黑方") + "回合");
                     boardPanel.repaint();
                     notationPanel.updateNotation();
 
-                    // 重启胜利检测计时器
+                    // 重启胜利检测
                     victoryDialogShowing = false;
                     if (victoryTimer != null) victoryTimer.start();
 
@@ -244,6 +365,9 @@ public class GameFrame extends JFrame {
                     JOptionPane.showMessageDialog(this, "读档失败，存档可能已损坏");
                 }
             }
+        }
+        if (wasRunning && model.getGameState() == ChessBoardModel.GameState.PLAYING) {
+            gameClock.start();
         }
     }
 
@@ -275,31 +399,18 @@ public class GameFrame extends JFrame {
      * 处理和棋
      */
     private void handleDraw() {
-        // 弹出对话框让对方确认
-        String message = "向对方提议和棋？";
-        if (currentUser.isGuest) {
-            // 游客模式自动同意
-            int response = JOptionPane.showConfirmDialog(
-                    this,
-                    "提议和棋？（对方为AI，将自动同意）",
-                    "和棋提议",
-                    JOptionPane.YES_NO_OPTION
-            );
+        int response = JOptionPane.showConfirmDialog(
+                this,
+                ((model.isRedTurn()) ? "红方":"黑方") + "提议和棋？",
+                "和棋提议",
+                JOptionPane.YES_NO_OPTION
+        );
 
-            if (response == JOptionPane.YES_OPTION) {
-                boolean success = model.proposeDraw();
-                if (success) {
-                    showVictoryMessage();
-                }
+        if (response == JOptionPane.YES_OPTION) {
+            boolean success = model.proposeDraw();
+            if (success) {
+                showVictoryMessage();
             }
-        } else {
-            // 双人模式需要对方确认
-            JOptionPane.showMessageDialog(
-                    this,
-                    "和棋功能在双人模式中需要双方同意\n请在另一台设备上操作",
-                    "和棋提议",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
         }
     }
 
@@ -476,24 +587,36 @@ public class GameFrame extends JFrame {
      * 修改重启方法
      */
     private void handleRestart() {
-        model.resetGame();
-        this.currentLoadedSaveName = null;
-        label.setText("红方回合");
 
-        enableControlButtons();
+        int response = JOptionPane.showConfirmDialog(this, "确定要重启游戏吗？", "重启游戏", JOptionPane.YES_NO_OPTION);
 
-        boardPanel.repaint();
-        notationPanel.updateNotation();
+        if (response == JOptionPane.YES_OPTION) {
+            model.resetGame();
+            if (config.getMode() == GameConfig.Mode.TIMED) {
+                redTimeRemaining = config.getInitialTimeSeconds();
+                blackTimeRemaining = config.getInitialTimeSeconds();
+                updateTimerLabels();
+                if (gameClock != null) gameClock.restart();
+            }
+            this.currentLoadedSaveName = null;
+            label.setText("红方回合");
 
-        // 重新启用按钮和面板
-        boardPanel.setEnabled(true);
-        surrenderButton.setEnabled(true);
-        drawButton.setEnabled(true);
+            enableControlButtons();
 
-        victoryDialogShowing = false;
+            boardPanel.repaint();
+            notationPanel.updateNotation();
 
-        // 重启计时器
-        victoryTimer.start();
+            // 重新启用按钮和面板
+            boardPanel.setEnabled(true);
+            surrenderButton.setEnabled(true);
+            drawButton.setEnabled(true);
+
+            victoryDialogShowing = false;
+
+            // 重启计时器
+            victoryTimer.start();
+        }
+
 //        model.loadStalemateTest();
 //
 //        label.setText("测试模式：红方困毙局面");
@@ -571,14 +694,12 @@ public class GameFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "保存失败！");
                 return true;
             }
-        } else if (option == JOptionPane.NO_OPTION) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return option == JOptionPane.NO_OPTION;
     }
 
-    // 禁用游戏控制按钮
+    /**
+     * 禁用控制按钮
+     */
     private void disableControlButtons() {
         undoButton.setEnabled(false);
         saveButton.setEnabled(false);
@@ -589,7 +710,9 @@ public class GameFrame extends JFrame {
         boardPanel.setEnabled(false);
     }
 
-    // 启用游戏控制按钮
+    /**
+     * 启用控制按钮
+     */
     private void enableControlButtons() {
         undoButton.setEnabled(true);
         saveButton.setEnabled(!currentUser.isGuest);
@@ -597,5 +720,87 @@ public class GameFrame extends JFrame {
         surrenderButton.setEnabled(true);
         drawButton.setEnabled(true);
         boardPanel.setEnabled(true);
+    }
+
+    private void initTimers() {
+
+        this.redTimeRemaining = config.getInitialTimeSeconds();
+        this.blackTimeRemaining = config.getInitialTimeSeconds();
+
+        JPanel timerPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        timerPanel.setBorder(BorderFactory.createTitledBorder("比赛时间"));
+        timerPanel.setMaximumSize(new Dimension(200, 100)); // 限制高度
+
+        redTimerLabel = new JLabel(formatTime(redTimeRemaining), SwingConstants.CENTER);
+        blackTimerLabel = new JLabel(formatTime(blackTimeRemaining), SwingConstants.CENTER);
+
+        redTimerLabel.setFont(new Font("Monospaced", Font.BOLD, 24));
+        blackTimerLabel.setFont(new Font("Monospaced", Font.BOLD, 24));
+
+        redTimerLabel.setForeground(Color.RED);
+        redTimerLabel.setBorder(BorderFactory.createTitledBorder("红方"));
+
+        blackTimerLabel.setForeground(Color.BLACK);
+        blackTimerLabel.setBorder(BorderFactory.createTitledBorder("黑方"));
+
+        timerPanel.add(blackTimerLabel);
+        timerPanel.add(redTimerLabel);   // 红方在下面
+
+        // 添加到右侧面板
+        rightPanel.add(timerPanel);
+
+        // 启动倒计时
+        gameClock = new Timer(1000, e -> {
+            if (model.getGameState() != ChessBoardModel.GameState.PLAYING) {
+                return;
+            }
+
+            if (model.isRedTurn()) {
+                redTimeRemaining--;
+                if (redTimeRemaining <= 0) handleTimeout(true);
+            } else {
+                blackTimeRemaining--;
+                if (blackTimeRemaining <= 0) handleTimeout(false);
+            }
+            updateTimerLabels();
+        });
+        gameClock.start();
+    }
+
+    private void updateTimerLabels() {
+        if (redTimerLabel == null || blackTimerLabel == null) return;//如果不是计时模式，直接返回
+        redTimerLabel.setText(formatTime(redTimeRemaining));
+        blackTimerLabel.setText(formatTime(blackTimeRemaining));
+    }
+
+    private String formatTime(int totalSeconds) {
+        int m = totalSeconds / 60;
+        int s = totalSeconds % 60;
+        return String.format("%02d:%02d", m, s);
+    }
+
+    private void handleTimeout(boolean isRed) {
+        if (gameClock != null) gameClock.stop(); // 停止计时器
+
+        // 更新 Model 状态
+        model.triggerTimeout(isRed);
+        // 触发胜利弹窗
+        checkGameState();
+    }
+
+    /**
+     * 加缪
+     *
+     */
+    public void onMoveMade() {
+        if (config.getMode() == GameConfig.Mode.TIMED && redTimerLabel != null) {
+            // 给刚下完的那一方加秒
+            if (!model.isRedTurn()) {
+                redTimeRemaining += config.getIncrementSeconds();
+            } else {
+                blackTimeRemaining += config.getIncrementSeconds();
+            }
+            updateTimerLabels();
+        }
     }
 }

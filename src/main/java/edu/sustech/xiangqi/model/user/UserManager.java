@@ -56,4 +56,15 @@ public class UserManager {
             System.err.println("保存用户数据失败: " + e.getMessage());
         }
     }
+
+    public boolean changePassword(String username, String oldPwd, String newPwd) {
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(oldPwd)) {
+                user.setPassword(newPwd);
+                userSave(); // 保存到文件
+                return true;
+            }
+        }
+        return false;
+    }
 }

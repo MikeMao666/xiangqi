@@ -97,7 +97,14 @@ public class ChessBoardPanel extends JPanel {
                 if (notationPanel != null) {
                     notationPanel.updateNotation();
                 }
+                try {
+                    Window window = SwingUtilities.getWindowAncestor(this);
+                    if (window instanceof GameFrame) {
+                        ((GameFrame) window).onMoveMade();
+                    }
+                } catch (Exception e) {
 
+                }
                 // 如果游戏结束，立即显示消息
                 if (state != ChessBoardModel.GameState.PLAYING) {
                     // 强制UI更新
@@ -109,6 +116,8 @@ public class ChessBoardPanel extends JPanel {
                         }
                     });
                 }
+
+
             } else {
                 if (label != null) {
                     label.setText("非法移动！" + (model.isRedTurn() ? "红方" : "黑方") + "回合");

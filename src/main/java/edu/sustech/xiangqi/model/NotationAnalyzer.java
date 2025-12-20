@@ -40,18 +40,18 @@ public class NotationAnalyzer {
         switch (char1) {
             case "前", "后" -> {
                 switch (char2) {
-                    case "兵", "炮", "车", "马", "相", "仕", "帅" -> {
+                    case "兵", "炮", "车", "马", "相", "仕" -> {
                         isRed = true;
                         pieceName = char2;
 
                         List<AbstractPiece> sameColumnPieces = new ArrayList<>();
 
                         for (AbstractPiece p : model.getPieces()) {
-                            if (p.getName().equals(pieceName) &&
-                                    p.getCol() == fromCol) {
-                                sameColumnPieces.add(p);
+                            if (p.getName().equals(pieceName)) {
+                                sameColumnPieces.add(p);//先把两个字儿找到
                             }
                         }
+                        if(sameColumnPieces.size() != 2) return;
                         sameColumnPieces.sort((p1, p2) -> {
                             if (isRed) {
                                 return Integer.compare(p1.getRow(), p2.getRow());
@@ -64,7 +64,7 @@ public class NotationAnalyzer {
                         fromRow = sameColumnPieces.get(index).getRow();
                         fromCol = sameColumnPieces.get(index).getCol();
                     }
-                    case "卒", "砲", "車", "馬", "象", "士", "將" -> {
+                    case "卒", "砲", "車", "馬", "象", "士" -> {
                         isRed = false;
                         pieceName = char2;
 

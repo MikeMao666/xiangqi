@@ -2,6 +2,7 @@ package edu.sustech.xiangqi;
 
 import edu.sustech.xiangqi.model.user.*;
 import edu.sustech.xiangqi.ui.GameFrame;
+import edu.sustech.xiangqi.ui.MainMenuFrame;
 import edu.sustech.xiangqi.ui.RegisterDialog;
 
 import javax.swing.*;
@@ -203,22 +204,10 @@ public class XiangqiApplication {
     }
 
     private static void startGame() {
-        // 创建游戏主界面
-        GameFrame gameFrame = new GameFrame("中国象棋", currentUser);
+        // 创建主菜单
+        MainMenuFrame menuFrame = new MainMenuFrame(currentUser, userManager);
+        menuFrame.setVisible(true);
 
-        // 设置游戏窗口关闭时的行为
-        gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-        // 添加窗口监听器
-        gameFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                if (gameFrame.checkAndSaveOnExit())//判断是否退出
-                    System.exit(0);
-            }
-        });
-
-        gameFrame.setVisible(true);
         loginFrame.dispose();
     }
 

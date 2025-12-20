@@ -2,8 +2,10 @@ package edu.sustech.xiangqi.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,5 +93,76 @@ public class SaveManager {
     public boolean deleteSave(String saveName, String username) {
         File saveFile = new File(SAVE_DIR, username + "_" + saveName + ".json");
         return saveFile.exists() && saveFile.delete();
+    }
+
+    /**
+     * 导出
+     */
+    public boolean exportSaveToText(Save save, File targetFile) {
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(targetFile), StandardCharsets.UTF_8))) {
+            List<String> moves = save.getMoveNotations();
+
+            for (int i = 0; i < moves.size(); i += 2) {
+                int round = (i / 2) + 1;
+                String redMove = moves.get(i);
+                String blackMove = (i + 1 < moves.size()) ? moves.get(i + 1) : "";
+
+                if (blackMove.isEmpty()) {
+                    writer.printf("%d. %s%n", round, redMove);
+                } else {
+                    writer.printf("%d. %s %s%n", round, redMove, blackMove);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 导入
+     */
+    public Save importSaveFromText(File sourceFile, String username) {
+        List<String> moveNotations = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                // 1. 去掉序号（如 "1.", "12."）
+                // 正则含义：数字 + 点 + 可能的空格
+                line = line.replaceAll("\\d+\\.", " ");
+
+                // 2. 替换掉可能存在的全角空格或其他分隔符，统一变为空格
+                line = line.replaceAll("[\\t\\u3000]", " ");
+
+                // 3. 按空格分割
+                String[] parts = line.split("\\s+");
+                for (String part : parts) {
+                    // 过滤掉空的，或者显然不是棋谱的短字符串（虽然 NotationAnalyzer 也会检查）
+                    if (part.length() >= 2) {
+                        moveNotations.add(part);
+                    }
+                }
+            }
+
+            if (moveNotations.isEmpty()) {
+                return null;
+            }
+
+            // 生成存档名 (Imported_时间)
+            String timeStr = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
+            String saveName = "Imported_" + timeStr;
+
+            boolean isRedTurn = (moveNotations.size() % 2 == 0);
+
+            return new Save(saveName, username, isRedTurn, moveNotations);
+
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
