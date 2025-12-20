@@ -206,6 +206,12 @@ public class ChessBoardModel {
         if (gameState != GameState.PLAYING) {
             return;
         }
+        //再检查死局 (双方无进攻子力)
+        if (checkInsufficientMaterial()) {
+            gameState = GameState.DRAW;
+            victoryMessage = "双方无进攻子力，死局判和！";
+            return;
+        }
 
         // 然后检查是否将军
         boolean currentPlayerInCheck = isInCheck();
@@ -690,5 +696,25 @@ public class ChessBoardModel {
             gameState = GameState.RED_WIN;
             victoryMessage = "黑方超时！红方胜利！";
         }
+    }
+
+    /**
+     * 检查是否子力不足（双方都没有进攻棋子（车、马、炮、兵/卒），只剩下将帅士象）
+     */
+    private boolean checkInsufficientMaterial() {
+        boolean redHasAttacker = false;
+        boolean blackHasAttacker = false;
+
+        for (AbstractPiece piece : pieces) {
+            // 检查是否是进攻性棋子
+            if (piece instanceof ChariotPiece ||
+                    piece instanceof HorsePiece ||
+                    piece instanceof CannonPiece ||
+                    piece instanceof SoldierPiece) {
+
+                return false;
+            }
+        }
+        return true;
     }
 }
