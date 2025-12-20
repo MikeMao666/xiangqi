@@ -1,0 +1,11 @@
+{
+  "saveName" : "重命名测试",
+  "username" : "test01",
+  "saveTime" : "2025-12-20 15:23:14",
+  "moveNotations" : [ "炮二平五", "馬8进7", "炮五进四", "馬7退8", "炮八平五", "砲8进4", "兵七进一", "砲8平5", "仕六进五", "馬8进7", "马八进七", "砲2进4", "马七进五", "砲2进3", "车九平八", "象7进9", "马五进四" ],
+  "initialTime" : 0,
+  "incrementTime" : 0,
+  "redTimeLeft" : 0,
+  "blackTimeLeft" : 0,
+  "redTurn" : false
+}
