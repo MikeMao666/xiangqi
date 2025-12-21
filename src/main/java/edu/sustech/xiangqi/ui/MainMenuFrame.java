@@ -30,14 +30,14 @@ public class MainMenuFrame extends JFrame {
         setSize(500, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         initializeUI();
     }
 
     private void initializeUI() {
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // --- 标签页 1: 开始游戏 ---
+        // 开始游戏页
         JPanel gamePanel = new JPanel(new GridLayout(4, 1, 10, 10));
         gamePanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
@@ -45,16 +45,16 @@ public class MainMenuFrame extends JFrame {
         JButton btnTimed = new JButton("计时赛 (快棋/包干)");
         JButton btnAI = new JButton("人机对战");
         JButton btnOnline = new JButton("联网对战");
-        
+
         styleButton(btnNormal, new Color(70, 130, 180));
         styleButton(btnTimed, new Color(255, 140, 0));
         styleButton(btnAI, Color.GRAY);
         styleButton(btnOnline, Color.GRAY);
 
         btnNormal.addActionListener(e -> startGame(new GameConfig()));
-        
+
         btnTimed.addActionListener(e -> showTimeSelectionDialog());
-        
+
         btnAI.addActionListener(e -> JOptionPane.showMessageDialog(this, "人机功能开发中..."));
         btnOnline.addActionListener(e -> JOptionPane.showMessageDialog(this, "联网功能开发中..."));
 
@@ -62,25 +62,25 @@ public class MainMenuFrame extends JFrame {
         gamePanel.add(btnTimed);
         gamePanel.add(btnAI);
         gamePanel.add(btnOnline);
-        
+
         tabbedPane.addTab("开始游戏", gamePanel);
 
-        // --- 标签页 2: 账户与存档 ---
+        // 账户管理页
         if (!currentUser.isGuest) {
             JPanel settingsPanel = new JPanel(new GridLayout(4, 1, 10, 10));
             settingsPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
             JButton btnChangePwd = new JButton("修改密码");
             JButton btnManageSaves = new JButton("存档管理");
-            
+
             btnChangePwd.addActionListener(e -> showChangePasswordDialog());
             btnManageSaves.addActionListener(e -> showSaveManagerDialog());
 
             settingsPanel.add(btnChangePwd);
             settingsPanel.add(btnManageSaves);
             // 占位
-            settingsPanel.add(new JLabel("")); 
-            
+            settingsPanel.add(new JLabel(""));
+
             JButton btnLogout = new JButton("注销登录");
             btnLogout.setForeground(Color.RED);
             btnLogout.addActionListener(e -> {
@@ -131,7 +131,7 @@ public class MainMenuFrame extends JFrame {
             dialog.dispose();
             startGame(new GameConfig(5, 3));
         });
-        
+
         JButton btnCustom = new JButton("自定义...");
         btnCustom.addActionListener(e -> {
             String minStr = JOptionPane.showInputDialog(dialog, "输入初始分钟数:");
@@ -155,10 +155,10 @@ public class MainMenuFrame extends JFrame {
     private void startGame(GameConfig config) {
         // 关闭主菜单，打开游戏窗口
         this.dispose();
-        
+
         // 修改 GameFrame 构造函数来接收 config
         GameFrame gameFrame = new GameFrame("中国象棋", currentUser, config);
-        
+
         // 设置关闭操作 (返回主菜单而不是退出程序!!!)
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -170,7 +170,7 @@ public class MainMenuFrame extends JFrame {
                 }
             }
         });
-        
+
         gameFrame.setVisible(true);
     }
 
@@ -180,10 +180,10 @@ public class MainMenuFrame extends JFrame {
         JPasswordField newPf = new JPasswordField();
         panel.add(new JLabel("旧密码:")); panel.add(oldPf);
         panel.add(new JLabel("新密码:")); panel.add(newPf);
-        
+
         int result = JOptionPane.showConfirmDialog(this, panel, "修改密码", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            boolean success = userManager.changePassword(currentUser.getUsername(), 
+            boolean success = userManager.changePassword(currentUser.getUsername(),
                     new String(oldPf.getPassword()), new String(newPf.getPassword()));
             if (success) JOptionPane.showMessageDialog(this, "密码修改成功");
             else JOptionPane.showMessageDialog(this, "旧密码错误");
@@ -194,7 +194,7 @@ public class MainMenuFrame extends JFrame {
         JDialog dialog = new JDialog(this, "存档管理", true);
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
-        
+
         List<Save> saves = saveManager.getUserSaves(currentUser.getUsername());
         DefaultListModel<String> listModel = new DefaultListModel<>();
         for (Save save : saves) {
@@ -203,7 +203,7 @@ public class MainMenuFrame extends JFrame {
                     : "[普通模式]";
             listModel.addElement(save.getSaveName() + modeInfo + " (" + save.getSaveTime() + ")");
         }
-        
+
         JList<String> list = new JList<>(listModel);
         dialog.add(new JScrollPane(list), BorderLayout.CENTER);
 

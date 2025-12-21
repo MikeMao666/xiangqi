@@ -1,10 +1,13 @@
 package edu.sustech.xiangqi.ui;
 
 import edu.sustech.xiangqi.model.*;
+import edu.sustech.xiangqi.model.pieces.AbstractPiece;
 import edu.sustech.xiangqi.model.user.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class GameFrame extends JFrame {
 
     private Timer victoryTimer;
     private boolean victoryDialogShowing = false;
-    // 记录当前加载的存档名称
+
     private String currentLoadedSaveName = null;
 
     private GameConfig config;
@@ -35,6 +38,12 @@ public class GameFrame extends JFrame {
     private JLabel redTimerLabel;
     private JLabel blackTimerLabel;
     private JPanel rightPanel;
+
+    private AudioManager audioManager;
+    private ThemeManager themeManager;
+    private JMenuBar menuBar;
+    private JCheckBoxMenuItem musicToggle;
+    private JSlider volumeSlider;
 
     public GameFrame(String title, User user, GameConfig config) {
         this.currentUser = user;
@@ -46,6 +55,19 @@ public class GameFrame extends JFrame {
 
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // 初始化音频和主题管理器
+        audioManager = AudioManager.getInstance();
+        themeManager = ThemeManager.getInstance();
+
+        // 创建菜单栏
+        createMenuBar();
+
+        // 设置初始主题
+        applyTheme();
+
+        // 播放背景音乐
+        audioManager.playBackgroundMusic("bg_music.wav");
 
         // 主面板
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -117,7 +139,7 @@ public class GameFrame extends JFrame {
 
         mainPanel.add(rightPanel, BorderLayout.EAST);
         this.add(mainPanel);
-        this.setSize(1000, 750);
+        this.setSize(775, 650);
         this.setLocationRelativeTo(null);
 
         // 计时器
@@ -160,7 +182,7 @@ public class GameFrame extends JFrame {
         if (wasRunning) gameClock.stop();
         String saveName;
 
-        // 2. 确定存档名称 (覆盖 or 新建)
+        // 确定存档名称 (覆盖 / 新建)
         if (currentLoadedSaveName != null) {
             // 如果是读档进来的，询问是否覆盖
             Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档", "取消"};
@@ -197,7 +219,7 @@ public class GameFrame extends JFrame {
             }
         }
 
-        // 3. 执行保存逻辑
+        // 保存
         if (saveName != null) {
             try {
                 // 获取棋谱步骤
@@ -205,7 +227,7 @@ public class GameFrame extends JFrame {
                 Save save;
 
                 if (config.getMode() == GameConfig.Mode.TIMED) {
-                    // 计时模式：保存时间信息
+                    // 计时模式保存时间信息
                     save = new Save(
                             saveName,
                             currentUser.getUsername(),
@@ -217,7 +239,7 @@ public class GameFrame extends JFrame {
                             blackTimeRemaining
                     );
                 } else {
-                    // 普通模式：时间字段设为 0
+                    // 普通模式时间字段设为 0
                     save = new Save(
                             saveName,
                             currentUser.getUsername(),
@@ -272,6 +294,7 @@ public class GameFrame extends JFrame {
             if (isCurrentTimed) {
                 // 计时模式只保留带有时间信息的存档
                 if (s.isTimedGame()) {
+                    if (s.getInitialTime() == config.getInitialTimeSeconds() && s.getIncrementTime() == config.getIncrementSeconds());//只能打开对应模式的存档
                     filteredSaves.add(s);
                 }
             } else {
@@ -525,6 +548,9 @@ public class GameFrame extends JFrame {
         exitButton.setBackground(new Color(220, 20, 60));
         exitButton.setForeground(Color.WHITE);
 
+        // 播放胜利音效
+        AudioManager.getInstance().playSoundEffect("win.wav");
+
         //游客不让回放
         if (currentUser.isGuest) {
             replayButton.setEnabled(false);
@@ -556,7 +582,9 @@ public class GameFrame extends JFrame {
 
         exitButton.addActionListener(e -> {
             if (checkAndSaveOnExit())//退出前也问要不要保存
-                System.exit(0);
+                victoryDialog.dispose();
+            this.dispose();
+            new MainMenuFrame(currentUser, new edu.sustech.xiangqi.model.user.UserManager()).setVisible(true);//回到主界面
         });
         buttonPanel.add(replayButton);
         buttonPanel.add(restartButton);
@@ -568,7 +596,7 @@ public class GameFrame extends JFrame {
         victoryDialog.add(buttonPanel, BorderLayout.SOUTH);
 
         // 对话框关闭时的处理
-        victoryDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+        victoryDialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent windowEvent) {
                 victoryDialogShowing = false;
@@ -580,7 +608,7 @@ public class GameFrame extends JFrame {
             }
         });
 
-        victoryDialog.setVisible(true);
+        victoryDialog.setVisible(victoryDialogShowing);//!!!
     }
 
     /**
@@ -802,5 +830,92 @@ public class GameFrame extends JFrame {
             }
             updateTimerLabels();
         }
+    }
+
+    private void createMenuBar() {
+        menuBar = new JMenuBar();
+
+        // 音乐菜单
+        JMenu musicMenu = new JMenu("音乐");
+        musicToggle = new JCheckBoxMenuItem("开启背景音乐", true);
+        musicToggle.addActionListener(e -> {
+            if (musicToggle.isSelected()) {
+                audioManager.playBackgroundMusic("bg_music.wav");
+            } else {
+                audioManager.stopBackgroundMusic();
+            }
+        });
+
+        volumeSlider = new JSlider(0, 100, 50);
+        volumeSlider.setMajorTickSpacing(25);
+        volumeSlider.setPaintTicks(true);
+        volumeSlider.setPaintLabels(true);
+        volumeSlider.addChangeListener(e -> {
+            float volume = volumeSlider.getValue() / 100.0f;
+            audioManager.setVolume(volume);
+        });
+
+        JPanel volumePanel = new JPanel();
+        volumePanel.add(new JLabel("音量:"));
+        volumePanel.add(volumeSlider);
+
+        musicMenu.add(musicToggle);
+        musicMenu.addSeparator();
+        musicMenu.add(volumePanel);
+
+        // 主题菜单
+        JMenu themeMenu = new JMenu("主题");
+        String[] themes = themeManager.getAvailableThemes();
+
+        ButtonGroup themeGroup = new ButtonGroup();
+        for (String theme : themes) {
+            JRadioButtonMenuItem themeItem = new JRadioButtonMenuItem(theme);
+            themeItem.setSelected(theme.equals(themeManager.getCurrentTheme()));
+            themeItem.addActionListener(e -> {
+                themeManager.setTheme(theme);
+                applyTheme();
+            });
+            themeGroup.add(themeItem);
+            themeMenu.add(themeItem);
+        }
+
+        menuBar.add(musicMenu);
+        menuBar.add(themeMenu);
+
+        this.setJMenuBar(menuBar);
+    }
+
+    // 添加应用主题的方法
+    private void applyTheme() {
+        ThemeManager.Theme theme = themeManager.getCurrentThemeObject();
+
+        // 应用主题到主面板
+        getContentPane().setBackground(theme.uiBgColor);
+
+        // 应用主题到右侧面板
+        if (rightPanel != null) {
+            rightPanel.setBackground(theme.uiBgColor);
+        }
+
+        // 应用主题到棋盘面板
+        if (boardPanel != null) {
+            boardPanel.applyTheme(theme);
+        }
+
+        // 应用主题到标签
+        if (label != null) {
+            label.setForeground(theme.uiTextColor);
+        }
+
+        // 重新绘制
+        revalidate();
+        repaint();
+    }
+
+    // 在关闭时停止音乐
+    @Override
+    public void dispose() {
+        audioManager.stopBackgroundMusic();
+        super.dispose();
     }
 }

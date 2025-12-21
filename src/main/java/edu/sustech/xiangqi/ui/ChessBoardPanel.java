@@ -32,8 +32,17 @@ public class ChessBoardPanel extends JPanel {
 
     private AbstractPiece selectedPiece = null;
 
+    private ThemeManager.Theme currentTheme;
+
+    // 添加应用主题的方法
+    public void applyTheme(ThemeManager.Theme theme) {
+        this.currentTheme = theme;
+        repaint();
+    }
+
     public ChessBoardPanel(ChessBoardModel model) {
         this.model = model;
+        this.currentTheme = ThemeManager.getInstance().getCurrentThemeObject();
         setPreferredSize(new Dimension(
                 CELL_SIZE * (ChessBoardModel.getCols() - 1) + MARGIN * 2,
                 CELL_SIZE * (ChessBoardModel.getRows() - 1) + MARGIN * 2
@@ -56,6 +65,8 @@ public class ChessBoardPanel extends JPanel {
         // 添加到面板（需要调整布局）
         setLayout(new BorderLayout());
         add(checkLabel, BorderLayout.SOUTH);
+        selectedPiece = null; // 清空选中状态
+        validMoves.clear(); // 清空高亮路径
     }
 
     private void handleMouseClick(int x, int y) {
@@ -82,15 +93,34 @@ public class ChessBoardPanel extends JPanel {
                 }
             }
         } else {
+            // 记录移动前目标位置的棋子
+            AbstractPiece targetPieceBeforeMove = model.getPieceAt(row, col);
             // 移动棋子
             boolean moveSuccess = model.movePiece(selectedPiece, row, col);
             if (moveSuccess) {
+                // 播放音效
+                AudioManager audioManager = AudioManager.getInstance();
+
                 // 立即检查游戏状态
                 ChessBoardModel.GameState state = model.getGameState();
 
                 updateCheckStatus();
                 if (label != null) {
                     label.setText((model.isRedTurn() ? "红方" : "黑方") + "回合");
+                }
+
+                // 检查是否是吃子（有棋子且颜色不同）
+                if (targetPieceBeforeMove != null && targetPieceBeforeMove.isRed() != selectedPiece.isRed()) {
+                    // 吃子音效
+                    audioManager.playSoundEffect("capture.wav");
+                } else {
+                    // 普通移动音效
+                    audioManager.playSoundEffect("move.wav");
+                }
+
+                // 检查是否将军
+                if (model.isInCheck()) {
+                    audioManager.playSoundEffect("check.wav");
                 }
 
                 // 更新棋谱记录
@@ -188,12 +218,12 @@ public class ChessBoardPanel extends JPanel {
                 checkLabel.repaint(); // 强制刷新
             }
 
-            // 2. 更新右上方文字栏（核心）
+            // 2. 更新右上方文字栏
             if (label != null) {
                 String fullMsg = checkMsg + " 请移动" + (isRedInCheck ? "红方" : "黑方") + "棋子";
                 label.setText(fullMsg);
                 label.setForeground(isRedInCheck ? Color.RED : Color.BLACK);
-                label.repaint(); // 强制刷新
+                label.repaint();
             }
         } else {
             if (checkLabel != null) checkLabel.setVisible(false);
@@ -212,6 +242,7 @@ public class ChessBoardPanel extends JPanel {
         super.paintComponent(g);
 
         // 绘制棋盘和棋子
+        setBackground(currentTheme.boardColor);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -234,7 +265,14 @@ public class ChessBoardPanel extends JPanel {
         }
     }
 
-    // 覆盖原有drawValidMoves方法
+    public AbstractPiece getSelectedPiece() {
+        return selectedPiece;
+    }
+
+    public List<Point> getValidMoves() {
+        return validMoves;
+    }
+
     private void drawValidMoves(Graphics2D g2d) {
         if (validMoves.isEmpty() || selectedPiece == null) return;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -250,7 +288,7 @@ public class ChessBoardPanel extends JPanel {
 
             if (isCapture) {
                 // 吃子位置：绿框
-                g2d.setColor(new Color(0, 180, 0, 120));
+                g2d.setColor(currentTheme.highlightColor);
                 g2d.setStroke(new BasicStroke(3));
                 int cornerSize = 26;
                 int lineLength = 12;
@@ -302,7 +340,8 @@ public class ChessBoardPanel extends JPanel {
      * 绘制棋盘
      */
     private void drawBoard(Graphics2D g) {
-        g.setColor(Color.BLACK);
+        // 使用主题颜色
+        g.setColor(currentTheme.gridColor);
         g.setStroke(new BasicStroke(2));
 
         // 绘制横线
@@ -355,8 +394,8 @@ public class ChessBoardPanel extends JPanel {
             int x = MARGIN + piece.getCol() * CELL_SIZE; // 棋子中心X
             int y = MARGIN + piece.getRow() * CELL_SIZE; // 棋子中心Y
 
-            // 1. 绘制棋子底色（木色）
-            g.setColor(new Color(230, 150, 0));
+            // 1. 绘制棋子底色（使用主题颜色）
+            g.setColor(currentTheme.pieceBgColor);
             g.fillOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
@@ -366,9 +405,10 @@ public class ChessBoardPanel extends JPanel {
             g.drawOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 3. 绘制棋子文字（核心：修复文字消失问题）
-            String pieceName = piece.getName(); // 如"帅"、"将"、"车"等
-            g.setColor(piece.isRed()?Color.RED : Color.BLACK); // 白字在红/黑底上更清晰
+            // 3. 绘制棋子文字（使用主题颜色）
+            String pieceName = piece.getName();
+            g.setColor(piece.isRed() ? currentTheme.redPieceColor : currentTheme.blackPieceColor);
+
             // 文字居中计算（关键：避免文字偏移出棋子）
             FontMetrics fm = g.getFontMetrics();
             int textWidth = fm.stringWidth(pieceName);
@@ -377,20 +417,20 @@ public class ChessBoardPanel extends JPanel {
             int textY = y + textHeight / 2;
             g.drawString(pieceName, textX, textY); // 绘制文字
 
-            // 4. 选中棋子的黄色方框标记
+            // 4. 选中棋子的黄色方框标记（使用主题颜色）
             if (piece == selectedPiece) {
-                g.setColor(Color.YELLOW);
+                g.setColor(currentTheme.selectedColor);
                 g.setStroke(new BasicStroke(3));
                 g.drawRect(x - PIECE_RADIUS - 4, y - PIECE_RADIUS - 4,
                         (PIECE_RADIUS + 4) * 2, (PIECE_RADIUS + 4) * 2);
             }
 
-            // 5. 将军时将/帅的红色边框
+            // 5. 将军时的边框（使用主题颜色）
             if (piece instanceof GeneralPiece && model.isInCheck()) {
                 boolean isCheckedGeneralRed = ((piece.isRed() == model.isRedTurn()));
                 boolean isCheckedGeneralBlack = ((!piece.isRed() == !model.isRedTurn()));
                 if (isCheckedGeneralRed || isCheckedGeneralBlack) {
-                    g.setColor(Color.RED);
+                    g.setColor(currentTheme.checkColor);
                     g.setStroke(new BasicStroke(4));
                     g.drawOval(x - PIECE_RADIUS - 2, y - PIECE_RADIUS - 2,
                             (PIECE_RADIUS + 2) * 2, (PIECE_RADIUS + 2) * 2);
