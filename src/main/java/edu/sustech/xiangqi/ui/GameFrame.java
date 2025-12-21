@@ -273,7 +273,9 @@ public class GameFrame extends JFrame {
             if (isCurrentTimed) {
                 // 计时模式只保留带有时间信息的存档
                 if (s.isTimedGame()) {
-                    filteredSaves.add(s);
+                    if (s.getInitialTime() == config.getInitialTimeSeconds() &&
+                                    s.getIncrementTime() == config.getIncrementSeconds())//只能打开对应模式的存档
+                        filteredSaves.add(s);
                 }
             } else {
                 // 普通模式只保留普通存档
@@ -402,7 +404,7 @@ public class GameFrame extends JFrame {
     private void handleDraw() {
         int response = JOptionPane.showConfirmDialog(
                 this,
-                ((model.isRedTurn()) ? "红方":"黑方") + "提议和棋？",
+                ((model.isRedTurn()) ? "红方" : "黑方") + "提议和棋？",
                 "和棋提议",
                 JOptionPane.YES_NO_OPTION
         );
