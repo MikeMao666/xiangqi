@@ -1,0 +1,11 @@
+{
+  "saveName" : "10+0测试",
+  "username" : "test01",
+  "saveTime" : "2025-12-21 14:22:49",
+  "moveNotations" : [ "炮二平四", "砲8平6" ],
+  "initialTime" : 600,
+  "incrementTime" : 0,
+  "redTimeLeft" : 592,
+  "blackTimeLeft" : 597,
+  "redTurn" : true
+}

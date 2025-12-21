@@ -1,0 +1,11 @@
+{
+  "saveName" : "1",
+  "username" : "111",
+  "saveTime" : "2025-12-21 14:08:37",
+  "moveNotations" : [ "炮二进七" ],
+  "initialTime" : 0,
+  "incrementTime" : 0,
+  "redTimeLeft" : 0,
+  "blackTimeLeft" : 0,
+  "redTurn" : false
+}
