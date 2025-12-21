@@ -30,6 +30,10 @@ public class ChessBoardPanel extends JPanel {
     private static final int CELL_SIZE = 60;
     private static final int PIECE_RADIUS = 25;
 
+    //确定缩放后棋盘的左上角
+    private int startX;
+    private int startY;
+
     private AbstractPiece selectedPiece = null;
 
     public ChessBoardPanel(ChessBoardModel model) {
@@ -60,9 +64,16 @@ public class ChessBoardPanel extends JPanel {
         validMoves.clear(); // 清空高亮路径
     }
 
+    // 3. 核心：计算居中偏移量
+    private void calculateOffsets() {
+        // (面板总宽 - 棋盘网格宽) / 2 = 居中的起始X
+        this.startX = (getWidth() - CELL_SIZE * (ChessBoardModel.getCols() - 1)) / 2;
+        // (面板总高 - 棋盘网格高) / 2 = 居中的起始Y
+        this.startY = (getHeight() - CELL_SIZE * (ChessBoardModel.getRows() - 1)) / 2;
+    }
     private void handleMouseClick(int x, int y) {
-        int col = Math.round((float)(x - MARGIN) / CELL_SIZE);
-        int row = Math.round((float)(y - MARGIN) / CELL_SIZE);
+        int col = Math.round((float) (x - startX) / CELL_SIZE);
+        int row = Math.round((float) (y - startY) / CELL_SIZE);
 
         if (model.getGameState() != ChessBoardModel.GameState.PLAYING) {
             label.setText("游戏已结束，请重新开始");
@@ -213,6 +224,10 @@ public class ChessBoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+
+        // 每次绘制前计算一次偏移量，确保永远居中
+        calculateOffsets();
+
         // 绘制棋盘和棋子
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -228,7 +243,7 @@ public class ChessBoardPanel extends JPanel {
 
             // 绘制游戏结束文字
             g2d.setColor(Color.YELLOW);
-            g2d.setFont(new Font("楷体", Font.BOLD, 36));
+            g2d.setFont(new Font("楷体", Font.BOLD, 48));
             String gameOverText = "游戏结束";
             FontMetrics fm = g2d.getFontMetrics();
             int textWidth = fm.stringWidth(gameOverText);
@@ -244,15 +259,14 @@ public class ChessBoardPanel extends JPanel {
         return validMoves;
     }
 
-    // 覆盖原有drawValidMoves方法
     private void drawValidMoves(Graphics2D g2d) {
         if (validMoves.isEmpty() || selectedPiece == null) return;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // 高亮路径：半透明绿渐变+圆角
         for (Point p : validMoves) {
-            int centerX = MARGIN + p.y * CELL_SIZE;
-            int centerY = MARGIN + p.x * CELL_SIZE;
+            int centerX = startX + p.y * CELL_SIZE;
+            int centerY = startY + p.x * CELL_SIZE;
             int diameter = PIECE_RADIUS * 2 - 4; // 比棋子略小，不抢焦点
 // 检查目标位置是否有对方棋子（吃子场景）
             AbstractPiece targetPiece = model.getPieceAt(p.x, p.y);
@@ -317,37 +331,46 @@ public class ChessBoardPanel extends JPanel {
 
         // 绘制横线
         for (int i = 0; i < ChessBoardModel.getRows(); i++) {
-            int y = MARGIN + i * CELL_SIZE;
-            g.drawLine(MARGIN, y, MARGIN + (ChessBoardModel.getCols() - 1) * CELL_SIZE, y);
+            int y = startY + i * CELL_SIZE;
+            g.drawLine(startX, y, startX + (ChessBoardModel.getCols() - 1) * CELL_SIZE, y);
         }
 
         // 绘制竖线
         for (int i = 0; i < ChessBoardModel.getCols(); i++) {
-            int x = MARGIN + i * CELL_SIZE;
+            int x = startX + i * CELL_SIZE;
             if (i == 0 || i == ChessBoardModel.getCols() - 1) {
                 // 两边的竖线贯通整个棋盘
-                g.drawLine(x, MARGIN, x, MARGIN + (ChessBoardModel.getRows() - 1) * CELL_SIZE);
+                g.drawLine(x, startY, x, startY + (ChessBoardModel.getRows() - 1) * CELL_SIZE);
             } else {
                 // 中间的竖线分为上下两段（楚河汉界断开）
-                g.drawLine(x, MARGIN, x, MARGIN + 4 * CELL_SIZE);
-                g.drawLine(x, MARGIN + 5 * CELL_SIZE, x, MARGIN + (ChessBoardModel.getRows() - 1) * CELL_SIZE);
+                g.drawLine(x, startY, x, startY + 4 * CELL_SIZE);
+                g.drawLine(x, startY + 5 * CELL_SIZE, x, startY + (ChessBoardModel.getRows() - 1) * CELL_SIZE);
             }
         }
+
+
+        // 九宫格斜线
+        // 黑方
+        g.drawLine(startX + 3 * CELL_SIZE, startY, startX + 5 * CELL_SIZE, startY + 2 * CELL_SIZE);
+        g.drawLine(startX + 5 * CELL_SIZE, startY, startX + 3 * CELL_SIZE, startY + 2 * CELL_SIZE);
+        // 红方
+        g.drawLine(startX + 3 * CELL_SIZE, startY + 7 * CELL_SIZE, startX + 5 * CELL_SIZE, startY + 9 * CELL_SIZE);
+        g.drawLine(startX + 5 * CELL_SIZE, startY + 7 * CELL_SIZE, startX + 3 * CELL_SIZE, startY + 9 * CELL_SIZE);
 
         // 绘制"楚河"和"汉界"这两个文字
         g.setColor(Color.BLACK);
         g.setFont(new Font("楷体", Font.BOLD, 24));
 
-        int riverY = MARGIN + 4 * CELL_SIZE + CELL_SIZE / 2;
+        int riverY = startY + 4 * CELL_SIZE + CELL_SIZE / 2;
 
         String chuHeText = "楚河";
         FontMetrics fm = g.getFontMetrics();
         int chuHeWidth = fm.stringWidth(chuHeText);
-        g.drawString(chuHeText, MARGIN + CELL_SIZE * 2 - chuHeWidth / 2, riverY + 8);
+        g.drawString(chuHeText, startX + CELL_SIZE * 2 - chuHeWidth / 2, riverY + 8);
 
         String hanJieText = "汉界";
         int hanJieWidth = fm.stringWidth(hanJieText);
-        g.drawString(hanJieText, MARGIN + CELL_SIZE * 6 - hanJieWidth / 2, riverY + 8);
+        g.drawString(hanJieText, startX + CELL_SIZE * 6 - hanJieWidth / 2, riverY + 8);
     }
 
     /**
@@ -362,21 +385,21 @@ public class ChessBoardPanel extends JPanel {
         g.setFont(pieceFont);
 
         for (AbstractPiece piece : model.getPieces()) {
-            int x = MARGIN + piece.getCol() * CELL_SIZE; // 棋子中心X
-            int y = MARGIN + piece.getRow() * CELL_SIZE; // 棋子中心Y
+            int x = startX + piece.getCol() * CELL_SIZE; // 棋子中心X
+            int y = startY + piece.getRow() * CELL_SIZE; // 棋子中心Y
 
-            // 1. 绘制棋子底色（木色）
+            // 绘制棋子底色（木色）
             g.setColor(new Color(230, 150, 0));
             g.fillOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 2. 绘制棋子白色边框
+            // 绘制棋子白色边框
             g.setColor(Color.WHITE);
             g.setStroke(new BasicStroke(2));
             g.drawOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 3. 绘制棋子文字（核心：修复文字消失问题）
+            // 绘制棋子文字（核心：修复文字消失问题）
             String pieceName = piece.getName(); // 如"帅"、"将"、"车"等
             g.setColor(piece.isRed()?Color.RED : Color.BLACK); // 白字在红/黑底上更清晰
             // 文字居中计算（关键：避免文字偏移出棋子）
@@ -387,7 +410,7 @@ public class ChessBoardPanel extends JPanel {
             int textY = y + textHeight / 2;
             g.drawString(pieceName, textX, textY); // 绘制文字
 
-            // 4. 选中棋子的黄色方框标记
+            // 选中棋子的黄色方框标记
             if (piece == selectedPiece) {
                 g.setColor(Color.YELLOW);
                 g.setStroke(new BasicStroke(3));
@@ -395,7 +418,7 @@ public class ChessBoardPanel extends JPanel {
                         (PIECE_RADIUS + 4) * 2, (PIECE_RADIUS + 4) * 2);
             }
 
-            // 5. 将军时将/帅的红色边框
+            // 将军时将/帅的红色边框
             if (piece instanceof GeneralPiece && model.isInCheck()) {
                 boolean isCheckedGeneralRed = ((piece.isRed() == model.isRedTurn()));
                 boolean isCheckedGeneralBlack = ((!piece.isRed() == !model.isRedTurn()));

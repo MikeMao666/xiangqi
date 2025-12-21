@@ -423,13 +423,9 @@ public class GameFrame extends JFrame {
         ChessBoardModel.GameState state = model.getGameState();
 
         if (state != ChessBoardModel.GameState.PLAYING && !victoryDialogShowing) {
-            // 添加调试信息
-            System.out.println("检测到游戏结束状态: " + state + ", 消息: " + model.getVictoryMessage());
-
             // 停止计时器
             victoryTimer.stop();
 
-            // 设置标志位，防止重复弹出
             victoryDialogShowing = true;
 
             //锁住按钮
@@ -438,12 +434,11 @@ public class GameFrame extends JFrame {
             // 立即显示胜利消息
             showVictoryMessage();
 
-
             // 强制刷新界面
             revalidate();
             repaint();
 
-            // 稍作延迟，让用户看清最后一步棋
+            // 稍为延迟，让用户看清最后一步棋
             SwingUtilities.invokeLater(this::showVictoryMessage);
         }
     }
@@ -531,10 +526,7 @@ public class GameFrame extends JFrame {
 
 
         replayButton.addActionListener(e -> {
-            // 先关闭胜利弹窗
             victoryDialog.dispose();
-
-            // 获取移动历史
             List<MoveRecord> history = model.getMoveHistoryList();
             if (history.isEmpty()) {
                 JOptionPane.showMessageDialog(victoryDialog, "没有可回放的步数");
