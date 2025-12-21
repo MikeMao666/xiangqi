@@ -1,6 +1,7 @@
 package edu.sustech.xiangqi.ui;
 
 import edu.sustech.xiangqi.model.*;
+import edu.sustech.xiangqi.model.pieces.AbstractPiece;
 import edu.sustech.xiangqi.model.user.User;
 
 import javax.swing.*;
@@ -602,6 +603,11 @@ public class GameFrame extends JFrame {
             label.setText("红方回合");
 
             enableControlButtons();
+
+            List<Point> points = boardPanel.getValidMoves();
+            AbstractPiece selectedPiece = boardPanel.getSelectedPiece();
+            points.clear();
+            selectedPiece = null;
 
             boardPanel.repaint();
             notationPanel.updateNotation();

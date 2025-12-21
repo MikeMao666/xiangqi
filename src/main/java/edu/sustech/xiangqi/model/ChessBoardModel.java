@@ -534,8 +534,6 @@ public class ChessBoardModel {
             return false;
         }
 
-        // 实际实现需要双方同意
-        // 这里简化为直接判和
         gameState = GameState.DRAW;
         victoryMessage = "双方同意和棋！";
         return true;
@@ -632,7 +630,7 @@ public class ChessBoardModel {
 
     }
     /**
-     * 加载合法的困毙（红方判负）测试残局
+     * 困毙测试残局
      */
     public void loadStalemateTest() {
         this.pieces.clear();

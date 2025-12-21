@@ -56,6 +56,8 @@ public class ChessBoardPanel extends JPanel {
         // 添加到面板（需要调整布局）
         setLayout(new BorderLayout());
         add(checkLabel, BorderLayout.SOUTH);
+        selectedPiece = null; // 清空选中状态
+        validMoves.clear(); // 清空高亮路径
     }
 
     private void handleMouseClick(int x, int y) {
@@ -232,6 +234,14 @@ public class ChessBoardPanel extends JPanel {
             int textWidth = fm.stringWidth(gameOverText);
             g2d.drawString(gameOverText, (getWidth() - textWidth) / 2, getHeight() / 2);
         }
+    }
+
+    public AbstractPiece getSelectedPiece() {
+        return selectedPiece;
+    }
+
+    public List<Point> getValidMoves() {
+        return validMoves;
     }
 
     // 覆盖原有drawValidMoves方法
