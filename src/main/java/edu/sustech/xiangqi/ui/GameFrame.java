@@ -6,6 +6,8 @@ import edu.sustech.xiangqi.model.user.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class GameFrame extends JFrame {
 
     private Timer victoryTimer;
     private boolean victoryDialogShowing = false;
-    // 记录当前加载的存档名称
+
     private String currentLoadedSaveName = null;
 
     private GameConfig config;
@@ -97,7 +99,6 @@ public class GameFrame extends JFrame {
         drawButton.setBackground(new Color(30, 144, 255));
         drawButton.setForeground(Color.WHITE);
 
-        // 添加监听器 (代码不变)
         undoButton.addActionListener(e -> handleUndo());
         restartButton.addActionListener(e -> handleRestart());
         saveButton.addActionListener(e -> handleSave());
@@ -112,13 +113,13 @@ public class GameFrame extends JFrame {
         buttonPanel.add(surrenderButton);
         buttonPanel.add(drawButton);
 
-        // 设置按钮最大高度，防止拉伸太难看
+        // 设置按钮最大高度，防止拉伸的太难看
         buttonPanel.setMaximumSize(new Dimension(200, 300));
         rightPanel.add(buttonPanel);
 
         mainPanel.add(rightPanel, BorderLayout.EAST);
         this.add(mainPanel);
-        this.setSize(1000, 750);
+        this.setSize(775, 650);
         this.setLocationRelativeTo(null);
 
         // 计时器
@@ -152,7 +153,6 @@ public class GameFrame extends JFrame {
     }
 
     private void handleSave() {
-        // 1. 游客检查
         if (currentUser.isGuest) {
             JOptionPane.showMessageDialog(this, "游客模式无法存档");
             return;
@@ -161,7 +161,7 @@ public class GameFrame extends JFrame {
         if (wasRunning) gameClock.stop();
         String saveName;
 
-        // 2. 确定存档名称 (覆盖 or 新建)
+        // 确定存档名称 (覆盖/新建)
         if (currentLoadedSaveName != null) {
             // 如果是读档进来的，询问是否覆盖
             Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档", "取消"};
@@ -198,15 +198,14 @@ public class GameFrame extends JFrame {
             }
         }
 
-        // 3. 执行保存逻辑
+        // 保存
         if (saveName != null) {
             try {
-                // 获取棋谱步骤
                 List<String> moves = model.getMoveNotations();
                 Save save;
 
                 if (config.getMode() == GameConfig.Mode.TIMED) {
-                    // 计时模式：保存时间信息
+                    // 计时模式保存时间信息
                     save = new Save(
                             saveName,
                             currentUser.getUsername(),
@@ -218,7 +217,7 @@ public class GameFrame extends JFrame {
                             blackTimeRemaining
                     );
                 } else {
-                    // 普通模式：时间字段设为 0
+                    // 普通模式时间字段设为 0
                     save = new Save(
                             saveName,
                             currentUser.getUsername(),
@@ -274,7 +273,7 @@ public class GameFrame extends JFrame {
                 // 计时模式只保留带有时间信息的存档
                 if (s.isTimedGame()) {
                     if (s.getInitialTime() == config.getInitialTimeSeconds() &&
-                                    s.getIncrementTime() == config.getIncrementSeconds())//只能打开对应模式的存档
+                            s.getIncrementTime() == config.getIncrementSeconds())//只能打开对应模式的存档
                         filteredSaves.add(s);
                 }
             } else {
@@ -286,8 +285,8 @@ public class GameFrame extends JFrame {
         }
 
         if (filteredSaves.isEmpty()) {
-            String msg = isCurrentTimed ? "没有找到符合当前【计时模式】的存档" : "没有找到符合当前【普通模式】的存档";
-            JOptionPane.showMessageDialog(this, msg);
+            String message = isCurrentTimed ? "没有找到符合当前【计时模式】的存档" : "没有找到符合当前【普通模式】的存档";
+            JOptionPane.showMessageDialog(this, message);
             return;
         }
 
@@ -456,9 +455,6 @@ public class GameFrame extends JFrame {
         ChessBoardModel.GameState state = model.getGameState();
         String message = model.getVictoryMessage();
 
-        // 添加调试信息
-        System.out.println("显示胜利消息: " + state + " - " + message);
-
         // 创建胜利对话框
         JDialog victoryDialog = new JDialog(this, "游戏结束", true);
         victoryDialog.setLayout(new BorderLayout());
@@ -528,7 +524,6 @@ public class GameFrame extends JFrame {
         exitButton.setBackground(new Color(220, 20, 60));
         exitButton.setForeground(Color.WHITE);
 
-        //游客不让回放
         if (currentUser.isGuest) {
             replayButton.setEnabled(false);
             replayButton.setToolTipText("注册用户专享功能");
@@ -559,7 +554,10 @@ public class GameFrame extends JFrame {
 
         exitButton.addActionListener(e -> {
             if (checkAndSaveOnExit())//退出前也问要不要保存
-                System.exit(0);
+                victoryDialog.dispose();
+            this.dispose();
+
+            new MainMenuFrame(currentUser, new edu.sustech.xiangqi.model.user.UserManager()).setVisible(true);//回到主界面
         });
         buttonPanel.add(replayButton);
         buttonPanel.add(restartButton);
@@ -571,26 +569,25 @@ public class GameFrame extends JFrame {
         victoryDialog.add(buttonPanel, BorderLayout.SOUTH);
 
         // 对话框关闭时的处理
-        victoryDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+        victoryDialog.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosed(WindowEvent windowEvent) {
                 victoryDialogShowing = false;
             }
 
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(WindowEvent windowEvent) {
                 victoryDialogShowing = false;
             }
         });
 
-        victoryDialog.setVisible(true);
+        victoryDialog.setVisible(victoryDialogShowing);//!!!
     }
 
     /**
      * 修改重启方法
      */
     private void handleRestart() {
-
         int response = JOptionPane.showConfirmDialog(this, "确定要重启游戏吗？", "重启游戏", JOptionPane.YES_NO_OPTION);
 
         if (response == JOptionPane.YES_OPTION) {
@@ -611,6 +608,7 @@ public class GameFrame extends JFrame {
             points.clear();
             selectedPiece = null;
 
+            boardPanel.revalidate();
             boardPanel.repaint();
             notationPanel.updateNotation();
 
@@ -656,7 +654,7 @@ public class GameFrame extends JFrame {
 
         int option = JOptionPane.showConfirmDialog(
                 this,
-                "正在退出游戏，是否保存当前棋谱？", //稍微改了下文案，更准确
+                "正在退出游戏，是否保存当前棋谱？",
                 "退出保存",
                 JOptionPane.YES_NO_CANCEL_OPTION
         );

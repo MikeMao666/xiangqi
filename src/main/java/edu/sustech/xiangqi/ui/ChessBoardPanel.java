@@ -182,20 +182,20 @@ public class ChessBoardPanel extends JPanel {
             boolean isRedInCheck = model.isRedTurn(); // 当前回合方=被将军方
             String checkMsg = isRedInCheck ? "红方被将军！" : "黑方被将军！";
 
-            // 1. 更新将军提示标签
+            // 更新将军提示标签
             if (checkLabel != null) {
                 checkLabel.setText(checkMsg);
                 checkLabel.setForeground(isRedInCheck ? Color.RED : Color.BLACK);
                 checkLabel.setVisible(true);
-                checkLabel.repaint(); // 强制刷新
+                checkLabel.repaint();
             }
 
-            // 2. 更新右上方文字栏（核心）
+            // 更新右上方文字栏
             if (label != null) {
                 String fullMsg = checkMsg + " 请移动" + (isRedInCheck ? "红方" : "黑方") + "棋子";
                 label.setText(fullMsg);
                 label.setForeground(isRedInCheck ? Color.RED : Color.BLACK);
-                label.repaint(); // 强制刷新
+                label.repaint();
             }
         } else {
             if (checkLabel != null) checkLabel.setVisible(false);

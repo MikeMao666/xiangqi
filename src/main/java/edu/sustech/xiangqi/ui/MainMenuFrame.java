@@ -37,7 +37,7 @@ public class MainMenuFrame extends JFrame {
     private void initializeUI() {
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // --- 标签页 1: 开始游戏 ---
+        // 开始游戏页
         JPanel gamePanel = new JPanel(new GridLayout(4, 1, 10, 10));
         gamePanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
@@ -65,7 +65,7 @@ public class MainMenuFrame extends JFrame {
         
         tabbedPane.addTab("开始游戏", gamePanel);
 
-        // --- 标签页 2: 账户与存档 ---
+        // 账户管理页
         if (!currentUser.isGuest) {
             JPanel settingsPanel = new JPanel(new GridLayout(4, 1, 10, 10));
             settingsPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
