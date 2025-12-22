@@ -444,8 +444,6 @@ public class GameFrame extends JFrame {
         ChessBoardModel.GameState state = model.getGameState();
 
         if (state != ChessBoardModel.GameState.PLAYING && !victoryDialogShowing) {
-            // 添加调试信息
-            System.out.println("检测到游戏结束状态: " + state + ", 消息: " + model.getVictoryMessage());
 
             // 停止计时器
             victoryTimer.stop();

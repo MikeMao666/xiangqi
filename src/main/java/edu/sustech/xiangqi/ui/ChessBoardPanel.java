@@ -272,7 +272,7 @@ public class ChessBoardPanel extends JPanel {
 
             // 绘制游戏结束文字
             g2d.setColor(Color.YELLOW);
-            g2d.setFont(new Font("楷体", Font.BOLD, 48));
+            g2d.setFont(new Font("楷体", Font.BOLD, 36));
             String gameOverText = "游戏结束";
             FontMetrics fm = g2d.getFontMetrics();
             int textWidth = fm.stringWidth(gameOverText);
