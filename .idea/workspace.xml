@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment=".">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/userdata/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/userdata/users.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ReplayDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ReplayDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/XiangqiApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/AudioManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/AudioManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,7 +239,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766395485735</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary=".">
+      <option name="closed" value="true" />
+      <created>1766397398402</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1766397398402</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

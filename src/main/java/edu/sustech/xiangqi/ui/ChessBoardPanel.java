@@ -278,10 +278,6 @@ public class ChessBoardPanel extends JPanel {
         }
     }
 
-    public AbstractPiece getSelectedPiece() {
-        return selectedPiece;
-    }
-
     public List<Point> getValidMoves() {
         return validMoves;
     }
@@ -295,7 +291,7 @@ public class ChessBoardPanel extends JPanel {
             int centerX = startX + p.y * CELL_SIZE;
             int centerY = startY + p.x * CELL_SIZE;
             int diameter = PIECE_RADIUS * 2 - 4; // 比棋子略小，不抢焦点
-// 检查目标位置是否有对方棋子（吃子场景）
+            // 检查目标位置是否有对方棋子（吃子场景）
             AbstractPiece targetPiece = model.getPieceAt(p.x, p.y);
             boolean isCapture = targetPiece != null && targetPiece.isRed() != selectedPiece.isRed();
 

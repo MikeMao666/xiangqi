@@ -71,15 +71,6 @@ public class AudioManager {
         }
     }
 
-    public void toggleMute() {
-        isMuted = !isMuted;
-        if (isMuted) {
-            stopBackgroundMusic();
-        } else if (volume > 0) {
-            // 重新播放音乐（需要重新选择音乐）
-        }
-    }
-
     private void loadSoundEffects() {
         // 加载音效文件
         String[] effects = {"move.wav", "capture.wav", "check.wav", "win.wav"};

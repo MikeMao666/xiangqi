@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SaveManager {
     private static final String SAVE_DIR = "resources/saves";
@@ -31,28 +30,6 @@ public class SaveManager {
         } catch (IOException e) {
             System.err.println("保存游戏失败: " + e.getMessage());
             return false;
-        }
-    }
-
-    public Save loadGame(String saveName, String username) {
-        try {
-            File saveFile = new File(SAVE_DIR, username + "_" + saveName + ".json");
-            if (!saveFile.exists()) {
-                return null;
-            }
-
-            Save save = objectMapper.readValue(saveFile, Save.class);
-
-            if (!save.isValid()) {
-                System.err.println("存档文件已损坏");
-                return null;
-            }
-
-            return save;
-
-        } catch (IOException e) {
-            System.err.println("加载游戏失败，存档可能已损坏: " + e.getMessage());
-            return null;
         }
     }
 

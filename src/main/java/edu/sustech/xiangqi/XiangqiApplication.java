@@ -1,7 +1,6 @@
 package edu.sustech.xiangqi;
 
 import edu.sustech.xiangqi.model.user.*;
-import edu.sustech.xiangqi.ui.GameFrame;
 import edu.sustech.xiangqi.ui.MainMenuFrame;
 import edu.sustech.xiangqi.ui.RegisterDialog;
 
@@ -9,8 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class XiangqiApplication {
     private static User currentUser;
@@ -209,10 +206,5 @@ public class XiangqiApplication {
         menuFrame.setVisible(true);
 
         loginFrame.dispose();
-    }
-
-
-    public static User getCurrentUser() {
-        return currentUser;
     }
 }

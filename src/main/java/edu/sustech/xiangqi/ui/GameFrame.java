@@ -620,9 +620,7 @@ public class GameFrame extends JFrame {
             enableControlButtons();
 
             List<Point> points = boardPanel.getValidMoves();
-            AbstractPiece selectedPiece = boardPanel.getSelectedPiece();
             points.clear();
-            selectedPiece = null;
 
             boardPanel.revalidate();
             boardPanel.repaint();
@@ -638,23 +636,6 @@ public class GameFrame extends JFrame {
             // 重启计时器
             victoryTimer.start();
         }
-
-//        model.loadStalemateTest();
-//
-//        label.setText("测试模式：红方困毙局面");
-//        boardPanel.repaint();
-//        notationPanel.updateNotation();
-//
-//        // 重新启用按钮
-//        boardPanel.setEnabled(true);
-//        surrenderButton.setEnabled(true);
-//        drawButton.setEnabled(true);
-//        victoryDialogShowing = false;
-//
-//        if (victoryTimer != null) victoryTimer.start();
-//
-//        // 强制检查一次状态
-//        checkGameState();
     }
 
     /**
@@ -725,8 +706,8 @@ public class GameFrame extends JFrame {
     private void disableControlButtons() {
         undoButton.setEnabled(false);
         saveButton.setEnabled(false);
-        loadButton.setEnabled(false); // 读档通常允许，因为这相当于重新开始，看你需求
-        restartButton.setEnabled(true); // 重新开始永远允许
+        loadButton.setEnabled(false);
+        restartButton.setEnabled(true);
         surrenderButton.setEnabled(false);
         drawButton.setEnabled(false);
         boardPanel.setEnabled(false);
