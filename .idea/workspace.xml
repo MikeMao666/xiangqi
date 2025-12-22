@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="-增加损坏的存档">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/saves/test01_损坏的存档.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/saves/test01_损坏的存档.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" afterDir="false" />
-    </list>
+    <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="-增加损坏的存档" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,12 +44,12 @@
     &quot;assignee&quot;: &quot;MikeMao666&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/MikeMao666/xiangqi.git&quot;,
-    &quot;accountId&quot;: &quot;96db10e1-b4eb-4b58-b57e-35d0227ba5e0&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/MikeMao666/xiangqi.git",
+    "accountId": "28f8bf48-54eb-41d2-8661-ab7f71ca33e7"
   }
-}</component>
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>

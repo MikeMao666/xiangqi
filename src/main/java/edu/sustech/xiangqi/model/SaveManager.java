@@ -143,20 +143,16 @@ public class SaveManager {
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
-                // 1. 去掉序号（如 "1.", "12."）
-                // 正则含义：数字 + 点 + 可能的空格
+                // 去掉序号 数字 + 点 + 可能的空格
                 line = line.replaceAll("\\d+\\.", " ");
 
-                // 2. 替换掉可能存在的全角空格或其他分隔符，统一变为空格
+                // 替换掉可能存在的全角空格或其他分隔符，统一变为空格
                 line = line.replaceAll("[\\t\\u3000]", " ");
 
-                // 3. 按空格分割
+                // 按空格分割
                 String[] parts = line.split("\\s+");
                 for (String part : parts) {
-                    // 过滤掉空的，或者显然不是棋谱的短字符串（虽然 NotationAnalyzer 也会检查）
-                    if (part.length() >= 2) {
                         moveNotations.add(part);
-                    }
                 }
             }
 
@@ -164,7 +160,6 @@ public class SaveManager {
                 return null;
             }
 
-            // 生成存档名 (Imported_时间)
             String timeStr = LocalDateTime.now()
                     .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
             String saveName = "Imported_" + timeStr;
