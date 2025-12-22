@@ -26,7 +26,7 @@ public class ChessBoardPanel extends JPanel {
     }
     public void setLabel(JLabel label){this.label = label;}
 
-    private static final int MARGIN = 50;
+    private static final int MARGIN = 20;
     private static final int CELL_SIZE = 60;
     private static final int PIECE_RADIUS = 25;
 
@@ -73,11 +73,14 @@ public class ChessBoardPanel extends JPanel {
         validMoves.clear(); // 清空高亮路径
     }
 
-    // 计算居中偏移量
+    // 3. 核心：计算居中偏移量
     private void calculateOffsets() {
+        // (面板总宽 - 棋盘网格宽) / 2 = 居中的起始X
         this.startX = (getWidth() - CELL_SIZE * (ChessBoardModel.getCols() - 1)) / 2;
+        // (面板总高 - 棋盘网格高) / 2 = 居中的起始Y
         this.startY = (getHeight() - CELL_SIZE * (ChessBoardModel.getRows() - 1)) / 2;
     }
+
     private void handleMouseClick(int x, int y) {
         int col = Math.round((float) (x - startX) / CELL_SIZE);
         int row = Math.round((float) (y - startY) / CELL_SIZE);
@@ -219,15 +222,15 @@ public class ChessBoardPanel extends JPanel {
             boolean isRedInCheck = model.isRedTurn(); // 当前回合方=被将军方
             String checkMsg = isRedInCheck ? "红方被将军！" : "黑方被将军！";
 
-            // 更新将军提示标签
+            // 1. 更新将军提示标签
             if (checkLabel != null) {
                 checkLabel.setText(checkMsg);
                 checkLabel.setForeground(isRedInCheck ? Color.RED : Color.BLACK);
                 checkLabel.setVisible(true);
-                checkLabel.repaint();
+                checkLabel.repaint(); // 强制刷新
             }
 
-            // 更新右上方文字栏
+            // 2. 更新右上方文字栏
             if (label != null) {
                 String fullMsg = checkMsg + " 请移动" + (isRedInCheck ? "红方" : "黑方") + "棋子";
                 label.setText(fullMsg);
@@ -250,7 +253,6 @@ public class ChessBoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-
         // 每次绘制前计算一次偏移量，确保永远居中
         calculateOffsets();
 
@@ -270,7 +272,7 @@ public class ChessBoardPanel extends JPanel {
 
             // 绘制游戏结束文字
             g2d.setColor(Color.YELLOW);
-            g2d.setFont(new Font("楷体", Font.BOLD, 36));
+            g2d.setFont(new Font("楷体", Font.BOLD, 48));
             String gameOverText = "游戏结束";
             FontMetrics fm = g2d.getFontMetrics();
             int textWidth = fm.stringWidth(gameOverText);
@@ -376,7 +378,6 @@ public class ChessBoardPanel extends JPanel {
             }
         }
 
-
         // 九宫格斜线
         // 黑方
         g.drawLine(startX + 3 * CELL_SIZE, startY, startX + 5 * CELL_SIZE, startY + 2 * CELL_SIZE);
@@ -416,22 +417,22 @@ public class ChessBoardPanel extends JPanel {
             int x = startX + piece.getCol() * CELL_SIZE; // 棋子中心X
             int y = startY + piece.getRow() * CELL_SIZE; // 棋子中心Y
 
-            // 绘制棋子底色（使用主题颜色）
+            // 1. 绘制棋子底色（使用主题颜色）
             g.setColor(currentTheme.pieceBgColor);
             g.fillOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 绘制棋子白色边框
+            // 2. 绘制棋子白色边框
             g.setColor(Color.WHITE);
             g.setStroke(new BasicStroke(2));
             g.drawOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 绘制棋子文字（使用主题颜色）
+            // 3. 绘制棋子文字（使用主题颜色）
             String pieceName = piece.getName();
             g.setColor(piece.isRed() ? currentTheme.redPieceColor : currentTheme.blackPieceColor);
 
-            // 文字居中计算
+            // 文字居中计算（关键：避免文字偏移出棋子）
             FontMetrics fm = g.getFontMetrics();
             int textWidth = fm.stringWidth(pieceName);
             int textHeight = fm.getAscent() - fm.getDescent();
@@ -439,15 +440,14 @@ public class ChessBoardPanel extends JPanel {
             int textY = y + textHeight / 2;
             g.drawString(pieceName, textX, textY); // 绘制文字
 
-            // 选中棋子的黄色方框标记（使用主题颜色）
+            // 4. 选中棋子的黄色方框标记（使用主题颜色）
             if (piece == selectedPiece) {
                 g.setColor(currentTheme.selectedColor);
                 g.setStroke(new BasicStroke(3));
-                g.drawRect(x - PIECE_RADIUS - 4, y - PIECE_RADIUS - 4,
-                        (PIECE_RADIUS + 4) * 2, (PIECE_RADIUS + 4) * 2);
+                drawSelectedPieceEffect(g, x, y, currentTheme.selectedColor);
             }
 
-            // 将军时的边框（使用主题颜色）
+            // 5. 将军时的边框（使用主题颜色）
             if (piece instanceof GeneralPiece && model.isInCheck()) {
                 boolean isCheckedGeneralRed = ((piece.isRed() == model.isRedTurn()));
                 boolean isCheckedGeneralBlack = ((!piece.isRed() == !model.isRedTurn()));
@@ -459,5 +459,40 @@ public class ChessBoardPanel extends JPanel {
                 }
             }
         }
+    }
+
+    /**
+     * 绘制选中棋子时的四个角边框效果
+     */
+    private void drawSelectedPieceEffect(Graphics2D g, int centerX, int centerY, Color color) {
+        g.setColor(color);
+        g.setStroke(new BasicStroke(3));
+
+        int cornerSize = 26;  // 角的大小
+        int lineLength = 12;  // 每边线段的长度
+
+        // 左上角的边框
+        g.drawLine(centerX - cornerSize, centerY - cornerSize,
+                centerX - cornerSize + lineLength, centerY - cornerSize);
+        g.drawLine(centerX - cornerSize, centerY - cornerSize,
+                centerX - cornerSize, centerY - cornerSize + lineLength);
+
+        // 右上角的边框
+        g.drawLine(centerX + cornerSize, centerY - cornerSize,
+                centerX + cornerSize - lineLength, centerY - cornerSize);
+        g.drawLine(centerX + cornerSize, centerY - cornerSize,
+                centerX + cornerSize, centerY - cornerSize + lineLength);
+
+        // 左下角的边框
+        g.drawLine(centerX - cornerSize, centerY + cornerSize,
+                centerX - cornerSize + lineLength, centerY + cornerSize);
+        g.drawLine(centerX - cornerSize, centerY + cornerSize,
+                centerX - cornerSize, centerY + cornerSize - lineLength);
+
+        // 右下角的边框
+        g.drawLine(centerX + cornerSize, centerY + cornerSize,
+                centerX + cornerSize - lineLength, centerY + cornerSize);
+        g.drawLine(centerX + cornerSize, centerY + cornerSize,
+                centerX + cornerSize, centerY + cornerSize - lineLength);
     }
 }
