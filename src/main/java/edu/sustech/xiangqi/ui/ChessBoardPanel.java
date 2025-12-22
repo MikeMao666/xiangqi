@@ -415,22 +415,22 @@ public class ChessBoardPanel extends JPanel {
             int x = startX + piece.getCol() * CELL_SIZE; // 棋子中心X
             int y = startY + piece.getRow() * CELL_SIZE; // 棋子中心Y
 
-            // 1. 绘制棋子底色（使用主题颜色）
+            // 绘制棋子底色（使用主题颜色）
             g.setColor(currentTheme.pieceBgColor);
             g.fillOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 2. 绘制棋子白色边框
+            // 绘制棋子白色边框
             g.setColor(Color.WHITE);
             g.setStroke(new BasicStroke(2));
             g.drawOval(x - PIECE_RADIUS, y - PIECE_RADIUS,
                     PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
-            // 3. 绘制棋子文字（使用主题颜色）
+            // 绘制棋子文字（使用主题颜色）
             String pieceName = piece.getName();
             g.setColor(piece.isRed() ? currentTheme.redPieceColor : currentTheme.blackPieceColor);
 
-            // 文字居中计算（关键：避免文字偏移出棋子）
+            // 文字居中计算（避免文字偏移出棋子）
             FontMetrics fm = g.getFontMetrics();
             int textWidth = fm.stringWidth(pieceName);
             int textHeight = fm.getAscent() - fm.getDescent();

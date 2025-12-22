@@ -67,17 +67,29 @@ public class SaveManager {
 
         for (File file : files) {
             try {
-                // 读取存档对象
                 Save save = objectMapper.readValue(file, Save.class);
+
                 if (save != null && save.isValid()) {
-                    saves.add(save);
+                    try {
+                        DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+                        if (save.getSaveTime() == null) throw new NullPointerException();
+                        LocalDateTime.parse(save.getSaveTime(), formatter);//解析
+
+                        // 只有时间格式正确才加入列表
+                        saves.add(save);
+
+                    } catch (Exception e) {
+                        // 捕获时间解析错误，跳过这个存档
+                        System.err.println("跳过损坏存档 (时间格式错误): " + file.getName());
+                    }
                 }
             } catch (IOException e) {
-                System.err.println("读取存档列表失败: " + file.getName());
+                System.err.println("跳过损坏存档 (JSON损坏): " + file.getName());
             }
         }
 
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         // 按时间倒序排序
         saves.sort((s1, s2) -> {

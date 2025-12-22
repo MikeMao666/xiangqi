@@ -15,11 +15,11 @@ public class Save {
     private String saveTime;
     private boolean isRedTurn;
     private List<String> moveNotations;
-    //用于记录赛制和剩余时间 ---
-    private int initialTime;   // 初始时间(秒)
-    private int incrementTime; // 加秒(秒)
-    private int redTimeLeft;   // 红方剩余(秒)
-    private int blackTimeLeft; // 黑方剩余(秒)
+    //用于记录赛制和剩余时间
+    private int initialTime;
+    private int incrementTime;
+    private int redTimeLeft;
+    private int blackTimeLeft;
 
     public Save() {
     }

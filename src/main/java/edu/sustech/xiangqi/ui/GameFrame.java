@@ -133,13 +133,13 @@ public class GameFrame extends JFrame {
         buttonPanel.add(surrenderButton);
         buttonPanel.add(drawButton);
 
-        // 设置按钮最大高度，防止拉伸太难看
+        // 设置按钮最大高度，防止拉伸的太难看
         buttonPanel.setMaximumSize(new Dimension(200, 300));
         rightPanel.add(buttonPanel);
 
         mainPanel.add(rightPanel, BorderLayout.EAST);
         this.add(mainPanel);
-        this.setSize(775, 650);
+        this.setSize(800, 800);
         this.setLocationRelativeTo(null);
 
         // 计时器
@@ -173,7 +173,6 @@ public class GameFrame extends JFrame {
     }
 
     private void handleSave() {
-        // 1. 游客检查
         if (currentUser.isGuest) {
             JOptionPane.showMessageDialog(this, "游客模式无法存档");
             return;
@@ -182,7 +181,7 @@ public class GameFrame extends JFrame {
         if (wasRunning) gameClock.stop();
         String saveName;
 
-        // 确定存档名称 (覆盖 / 新建)
+        // 确定存档名称 (覆盖/新建)
         if (currentLoadedSaveName != null) {
             // 如果是读档进来的，询问是否覆盖
             Object[] options = {"覆盖原存档: " + currentLoadedSaveName, "另存为新存档", "取消"};
@@ -222,7 +221,6 @@ public class GameFrame extends JFrame {
         // 保存
         if (saveName != null) {
             try {
-                // 获取棋谱步骤
                 List<String> moves = model.getMoveNotations();
                 Save save;
 
@@ -294,8 +292,9 @@ public class GameFrame extends JFrame {
             if (isCurrentTimed) {
                 // 计时模式只保留带有时间信息的存档
                 if (s.isTimedGame()) {
-                    if (s.getInitialTime() == config.getInitialTimeSeconds() && s.getIncrementTime() == config.getIncrementSeconds());//只能打开对应模式的存档
-                    filteredSaves.add(s);
+                    if (s.getInitialTime() == config.getInitialTimeSeconds() &&
+                            s.getIncrementTime() == config.getIncrementSeconds())//只能打开对应模式的存档
+                        filteredSaves.add(s);
                 }
             } else {
                 // 普通模式只保留普通存档
@@ -306,8 +305,8 @@ public class GameFrame extends JFrame {
         }
 
         if (filteredSaves.isEmpty()) {
-            String msg = isCurrentTimed ? "没有找到符合当前【计时模式】的存档" : "没有找到符合当前【普通模式】的存档";
-            JOptionPane.showMessageDialog(this, msg);
+            String message = isCurrentTimed ? "没有找到符合当前【计时模式】的存档" : "没有找到符合当前【普通模式】的存档";
+            JOptionPane.showMessageDialog(this, message);
             return;
         }
 
@@ -424,7 +423,7 @@ public class GameFrame extends JFrame {
     private void handleDraw() {
         int response = JOptionPane.showConfirmDialog(
                 this,
-                ((model.isRedTurn()) ? "红方":"黑方") + "提议和棋？",
+                ((model.isRedTurn()) ? "红方" : "黑方") + "提议和棋？",
                 "和棋提议",
                 JOptionPane.YES_NO_OPTION
         );
@@ -444,11 +443,9 @@ public class GameFrame extends JFrame {
         ChessBoardModel.GameState state = model.getGameState();
 
         if (state != ChessBoardModel.GameState.PLAYING && !victoryDialogShowing) {
-
             // 停止计时器
             victoryTimer.stop();
 
-            // 设置标志位，防止重复弹出
             victoryDialogShowing = true;
 
             //锁住按钮
@@ -457,12 +454,11 @@ public class GameFrame extends JFrame {
             // 立即显示胜利消息
             showVictoryMessage();
 
-
             // 强制刷新界面
             revalidate();
             repaint();
 
-            // 稍作延迟，让用户看清最后一步棋
+            // 稍为延迟，让用户看清最后一步棋
             SwingUtilities.invokeLater(this::showVictoryMessage);
         }
     }
@@ -473,9 +469,6 @@ public class GameFrame extends JFrame {
     private void showVictoryMessage() {
         ChessBoardModel.GameState state = model.getGameState();
         String message = model.getVictoryMessage();
-
-        // 添加调试信息
-        System.out.println("显示胜利消息: " + state + " - " + message);
 
         // 创建胜利对话框
         JDialog victoryDialog = new JDialog(this, "游戏结束", true);
@@ -557,10 +550,7 @@ public class GameFrame extends JFrame {
 
 
         replayButton.addActionListener(e -> {
-            // 先关闭胜利弹窗
             victoryDialog.dispose();
-
-            // 获取移动历史
             List<MoveRecord> history = model.getMoveHistoryList();
             if (history.isEmpty()) {
                 JOptionPane.showMessageDialog(victoryDialog, "没有可回放的步数");
@@ -596,12 +586,12 @@ public class GameFrame extends JFrame {
         // 对话框关闭时的处理
         victoryDialog.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosed(WindowEvent windowEvent) {
                 victoryDialogShowing = false;
             }
 
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(WindowEvent windowEvent) {
                 victoryDialogShowing = false;
             }
         });
@@ -629,6 +619,12 @@ public class GameFrame extends JFrame {
 
             enableControlButtons();
 
+            List<Point> points = boardPanel.getValidMoves();
+            AbstractPiece selectedPiece = boardPanel.getSelectedPiece();
+            points.clear();
+            selectedPiece = null;
+
+            boardPanel.revalidate();
             boardPanel.repaint();
             notationPanel.updateNotation();
 
@@ -674,7 +670,7 @@ public class GameFrame extends JFrame {
 
         int option = JOptionPane.showConfirmDialog(
                 this,
-                "正在退出游戏，是否保存当前棋谱？", //稍微改了下文案，更准确
+                "正在退出游戏，是否保存当前棋谱？",
                 "退出保存",
                 JOptionPane.YES_NO_CANCEL_OPTION
         );

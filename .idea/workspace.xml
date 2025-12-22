@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="d8fc1939-4303-4225-bff1-af73b544f7dc" name="更改" comment="-增加损坏的存档">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/saves/test01_损坏的存档.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/saves/test01_损坏的存档.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/Save.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/model/SaveManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/ChessBoardPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sustech/xiangqi/ui/GameFrame.java" afterDir="false" />
     </list>
@@ -41,7 +44,6 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -222,7 +224,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766389751461</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="-增加损坏的存档">
+      <option name="closed" value="true" />
+      <created>1766392064940</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1766392064940</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
