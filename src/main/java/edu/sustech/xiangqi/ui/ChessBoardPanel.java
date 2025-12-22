@@ -66,18 +66,16 @@ public class ChessBoardPanel extends JPanel {
         checkLabel.setForeground(Color.RED);
         checkLabel.setVisible(false);
 
-        // 添加到面板（需要调整布局）
+        // 添加到面板
         setLayout(new BorderLayout());
         add(checkLabel, BorderLayout.SOUTH);
         selectedPiece = null; // 清空选中状态
         validMoves.clear(); // 清空高亮路径
     }
 
-    // 3. 核心：计算居中偏移量
+    // 计算居中偏移量
     private void calculateOffsets() {
-        // (面板总宽 - 棋盘网格宽) / 2 = 居中的起始X
         this.startX = (getWidth() - CELL_SIZE * (ChessBoardModel.getCols() - 1)) / 2;
-        // (面板总高 - 棋盘网格高) / 2 = 居中的起始Y
         this.startY = (getHeight() - CELL_SIZE * (ChessBoardModel.getRows() - 1)) / 2;
     }
 
@@ -222,7 +220,7 @@ public class ChessBoardPanel extends JPanel {
             boolean isRedInCheck = model.isRedTurn(); // 当前回合方=被将军方
             String checkMsg = isRedInCheck ? "红方被将军！" : "黑方被将军！";
 
-            // 1. 更新将军提示标签
+            // 更新将军提示标签
             if (checkLabel != null) {
                 checkLabel.setText(checkMsg);
                 checkLabel.setForeground(isRedInCheck ? Color.RED : Color.BLACK);
@@ -230,7 +228,7 @@ public class ChessBoardPanel extends JPanel {
                 checkLabel.repaint(); // 强制刷新
             }
 
-            // 2. 更新右上方文字栏
+            //  更新右上方文字栏
             if (label != null) {
                 String fullMsg = checkMsg + " 请移动" + (isRedInCheck ? "红方" : "黑方") + "棋子";
                 label.setText(fullMsg);
