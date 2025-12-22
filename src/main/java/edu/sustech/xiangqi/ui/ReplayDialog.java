@@ -38,12 +38,9 @@ public class ReplayDialog extends JDialog {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         add(statusLabel, BorderLayout.NORTH);
 
-        // 中间棋盘 (只读，不添加鼠标监听器或重写面板逻辑使其不可点击)
-        // 这里我们直接用 ChessBoardPanel，但在 Replay 模式下不处理点击事件
-        // 最简单的办法：replayPanel setEnabled(false) 或者覆盖监听器，
-        // 但由于 ChessBoardPanel 是纯绘制，只要没人调用 model.movePiece 就行。
+        // 中间棋盘 （不让点）
         replayPanel = new ChessBoardPanel(replayModel);
-        // 为了防止用户在回放盘上乱点，我们可以移除所有鼠标监听器
+
         for (MouseListener ml : replayPanel.getMouseListeners()) {
             replayPanel.removeMouseListener(ml);
         }
